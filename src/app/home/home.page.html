@@ -1,0 +1,43 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Mi Tienda
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Mi Tienda</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando productos...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <ion-card *ngFor="let product of products">
+      <img *ngIf="product.images && product.images.length > 0" [src]="product.images[0].src" [alt]="product.name" />
+      <ion-card-header>
+        <ion-card-subtitle>
+          <span [innerHTML]="product.price_html"></span>
+        </ion-card-subtitle>
+        <ion-card-title>{{ product.name }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div [innerHTML]="product.short_description"></div>
+      </ion-card-content>
+    </ion-card>
+    
+    <div *ngIf="products.length === 0" class="ion-text-center ion-padding">
+      <p>No hay productos disponibles.</p>
+    </div>
+  </div>
+</ion-content>
