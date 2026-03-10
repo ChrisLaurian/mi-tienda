@@ -3,6 +3,13 @@
     <ion-title>
       Mi Tienda
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="showPromoPreview()">Probar 20%</ion-button>
+      <ion-button routerLink="/cart">
+        Carrito
+        <ion-badge *ngIf="(cartCount$ | async) as count" color="primary">{{ count }}</ion-badge>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -17,27 +24,74 @@
     </ion-toolbar>
   </ion-header>
 
+  <div class="searchbar-container">
+    <ion-searchbar
+      [debounce]="350"
+      placeholder="Buscar productos"
+      (ionInput)="handleSearch($event)"
+    ></ion-searchbar>
+  </div>
+
+  <div class="category-chips">
+    <ion-chip
+      [color]="selectedCategoryId === null ? 'primary' : 'medium'"
+      [outline]="selectedCategoryId !== null"
+      (click)="selectCategory(null)"
+    >
+      <ion-label>Todos</ion-label>
+    </ion-chip>
+    <ion-chip
+      *ngFor="let category of categories"
+      [color]="selectedCategoryId === category.id ? 'primary' : 'medium'"
+      [outline]="selectedCategoryId !== category.id"
+      (click)="selectCategory(category.id)"
+    >
+      <ion-label>{{ category.name }}</ion-label>
+    </ion-chip>
+  </div>
+
   <div *ngIf="isLoading" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>
     <p>Cargando productos...</p>
   </div>
 
   <div *ngIf="!isLoading">
-    <ion-card *ngFor="let product of products">
-      <img *ngIf="product.images && product.images.length > 0" [src]="product.images[0].src" [alt]="product.name" />
-      <ion-card-header>
-        <ion-card-subtitle>
-          <span [innerHTML]="product.price_html"></span>
-        </ion-card-subtitle>
-        <ion-card-title>{{ product.name }}</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div [innerHTML]="product.short_description"></div>
-      </ion-card-content>
-    </ion-card>
+    <ion-grid fixed class="product-grid" *ngIf="products.length > 0">
+      <ion-row>
+        <ion-col size="6" sizeMd="4" sizeLg="3" *ngFor="let product of products">
+          <ion-card class="product-card" [routerLink]="['/product', product.id]">
+            <div class="product-image-wrapper">
+              <img
+                *ngIf="product.images && product.images.length > 0"
+                class="product-image"
+                [src]="product.images[0].src"
+                [alt]="product.name"
+                loading="lazy"
+              />
+              <div *ngIf="!product.images || product.images.length === 0" class="product-image product-image--placeholder"></div>
+            </div>
+            <ion-card-header class="product-card-header">
+              <ion-card-subtitle class="product-price">
+                <span [innerHTML]="product.price_html"></span>
+              </ion-card-subtitle>
+              <ion-card-title class="product-title">{{ product.name }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content class="product-card-content">
+              <div class="product-description" [innerHTML]="product.short_description"></div>
+              <ion-button size="small" expand="block" (click)="addToCart(product, $event)">
+                Agregar al carrito
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
     
     <div *ngIf="products.length === 0" class="ion-text-center ion-padding">
-      <p>No hay productos disponibles.</p>
+      <p *ngIf="searchTerm && selectedCategoryName">No hay resultados para "{{ searchTerm }}" en "{{ selectedCategoryName }}".</p>
+      <p *ngIf="searchTerm && !selectedCategoryName">No hay resultados para "{{ searchTerm }}".</p>
+      <p *ngIf="!searchTerm && selectedCategoryName">No hay productos en "{{ selectedCategoryName }}".</p>
+      <p *ngIf="!searchTerm && !selectedCategoryName">No hay productos disponibles.</p>
     </div>
   </div>
 </ion-content>

@@ -1,0 +1,43 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/cart">
+        Carrito
+        <ion-badge *ngIf="(cartCount$ | async) as count" color="primary">{{ count }}</ion-badge>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando producto...</p>
+  </div>
+
+  <div *ngIf="!isLoading && product" class="product-detail ion-padding">
+    <div class="product-detail-image-wrapper">
+      <img
+        *ngIf="product.images && product.images.length > 0"
+        class="product-detail-image"
+        [src]="product.images[0].src"
+        [alt]="product.name"
+        loading="lazy"
+      />
+      <div *ngIf="!product.images || product.images.length === 0" class="product-detail-image product-detail-image--placeholder"></div>
+    </div>
+
+    <h1 class="product-detail-title">{{ product.name }}</h1>
+    <div class="product-detail-price" [innerHTML]="product.price_html"></div>
+    <ion-button expand="block" (click)="addToCart()">Agregar al carrito</ion-button>
+    <div class="product-detail-description" [innerHTML]="product.description"></div>
+  </div>
+
+  <div *ngIf="!isLoading && !product" class="ion-text-center ion-padding">
+    <p>No se pudo cargar el producto.</p>
+  </div>
+</ion-content>

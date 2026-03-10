@@ -1,0 +1,57 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Carrito</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="clear()">Vaciar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ng-container *ngIf="items$ | async as items">
+    <div *ngIf="items.length === 0" class="ion-text-center ion-padding">
+      <p>Tu carrito está vacío.</p>
+      <ion-button routerLink="/home">Ver productos</ion-button>
+    </div>
+
+    <ion-list *ngIf="items.length > 0">
+      <ion-item *ngFor="let item of items">
+        <ion-thumbnail slot="start">
+          <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" loading="lazy" />
+        </ion-thumbnail>
+        <ion-label>
+          <div class="item-title">{{ item.name }}</div>
+          <div class="item-subtitle">${{ item.price.toFixed(2) }}</div>
+          <div class="qty-row">
+            <ion-button size="small" (click)="decrease(item.productId, item.quantity)">-</ion-button>
+            <ion-badge color="medium">{{ item.quantity }}</ion-badge>
+            <ion-button size="small" (click)="increase(item.productId, item.quantity)">+</ion-button>
+            <ion-button size="small" fill="clear" (click)="remove(item.productId)">Eliminar</ion-button>
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <div *ngIf="items.length > 0" class="summary ion-padding">
+      <div *ngIf="(coupon$ | async) as coupon" class="summary-row">
+        <ng-container *ngIf="coupon">
+          <span>Cupón</span>
+          <strong>{{ coupon }}</strong>
+          <ion-button size="small" fill="clear" (click)="clearCoupon()">Quitar</ion-button>
+        </ng-container>
+      </div>
+      <div class="summary-row">
+        <span>Artículos</span>
+        <strong>{{ (totalQuantity$ | async) ?? 0 }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Total</span>
+        <strong>${{ ((totalPrice$ | async) ?? 0).toFixed(2) }}</strong>
+      </div>
+      <ion-button expand="block" routerLink="/checkout">Continuar</ion-button>
+    </div>
+  </ng-container>
+</ion-content>

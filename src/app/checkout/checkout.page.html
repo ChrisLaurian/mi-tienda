@@ -1,0 +1,76 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/cart"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Finalizar</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div *ngIf="createdOrder" class="ion-padding">
+    <h2>Orden creada</h2>
+    <p>Tu orden quedó registrada con el número <strong>#{{ createdOrder.number || createdOrder.id }}</strong>.</p>
+    <p *ngIf="createdOrder.status">Estado: <strong>{{ createdOrder.status }}</strong></p>
+    <ion-button expand="block" (click)="payNow()" [disabled]="!paymentUrl">Pagar ahora</ion-button>
+    <ion-button expand="block" fill="outline" (click)="refreshOrderStatus()" [disabled]="isCheckingStatus">
+      <span *ngIf="!isCheckingStatus">Verificar pago</span>
+      <ion-spinner *ngIf="isCheckingStatus" name="crescent"></ion-spinner>
+    </ion-button>
+    <ion-button expand="block" routerLink="/home">Seguir comprando</ion-button>
+  </div>
+
+  <div *ngIf="!createdOrder" class="ion-padding">
+    <ion-text color="danger" *ngIf="errorMessage">
+      <p>{{ errorMessage }}</p>
+    </ion-text>
+
+    <ion-list>
+      <ion-item>
+        <ion-label position="stacked">Nombre</ion-label>
+        <ion-input [formControl]="form.controls.firstName" autocomplete="given-name"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Apellido</ion-label>
+        <ion-input [formControl]="form.controls.lastName" autocomplete="family-name"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input [formControl]="form.controls.email" type="email" autocomplete="email"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Teléfono</ion-label>
+        <ion-input [formControl]="form.controls.phone" type="tel" autocomplete="tel"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Dirección</ion-label>
+        <ion-input [formControl]="form.controls.address1" autocomplete="street-address"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Ciudad</ion-label>
+        <ion-input [formControl]="form.controls.city" autocomplete="address-level2"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Estado</ion-label>
+        <ion-input [formControl]="form.controls.state" autocomplete="address-level1"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Código postal</ion-label>
+        <ion-input [formControl]="form.controls.postcode" autocomplete="postal-code"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">País (ISO, ej: MX)</ion-label>
+        <ion-input [formControl]="form.controls.country" autocomplete="country"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Notas</ion-label>
+        <ion-textarea [formControl]="form.controls.notes" autoGrow="true"></ion-textarea>
+      </ion-item>
+    </ion-list>
+
+    <ion-button expand="block" [disabled]="isSubmitting" (click)="submit()">
+      <span *ngIf="!isSubmitting">Crear orden</span>
+      <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
+    </ion-button>
+  </div>
+</ion-content>

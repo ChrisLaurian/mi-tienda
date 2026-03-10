@@ -1,0 +1,27 @@
+.item-title {
+  font-weight: 600;
+}
+
+.item-subtitle {
+  color: var(--ion-color-step-600, #666666);
+  margin-top: 2px;
+}
+
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.summary {
+  border-top: 1px solid var(--ion-color-step-150, #e0e0e0);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
