@@ -1,0 +1,11 @@
+{
+  "/wp-json": {
+    "target": "https://appprot.whapruebas.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/wp-json": "/index.php/wp-json"
+    }
+  }
+}

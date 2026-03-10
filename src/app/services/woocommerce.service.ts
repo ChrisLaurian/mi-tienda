@@ -8,7 +8,9 @@ import { Observable } from 'rxjs';
 })
 export class WoocommerceService {
   private http = inject(HttpClient);
-  private apiUrl = environment.woocommerce.url;
+  private apiUrl = environment.production ? environment.woocommerce.url : '';
+  private restBasePathDev = '/wp-json';
+  private restBasePathProd = '/index.php/wp-json';
   private consumerKey = environment.woocommerce.consumerKey;
   private consumerSecret = environment.woocommerce.consumerSecret;
 
@@ -21,9 +23,12 @@ export class WoocommerceService {
       .set('page', page.toString())
       .set('per_page', perPage.toString());
 
-    return this.http.get<any[]>(`${this.apiUrl}/wp-json/wc/v3/products`, { params });
-  }
+    const url = environment.production
+      ? `${this.apiUrl}${this.restBasePathProd}/wc/v3/products`
+      : `${this.restBasePathDev}/wc/v3/products`;
 
-  // Ejemplo de autenticación JWT si se requiere login de usuario
-  // login(username: string, password: string) { ... }
+    return this.http.get<any[]>(url, { 
+      params 
+    });
+  }
 }

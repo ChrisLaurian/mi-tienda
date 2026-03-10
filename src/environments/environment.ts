@@ -1,10 +1,9 @@
 export const environment = {
   production: false,
   woocommerce: {
-    url: 'https://tutienda.com', // REEMPLAZA ESTO CON LA URL DE TU SITIO WORDPRESS
-    consumerKey: 'ck_23e26582bde719bfbaf88bd22a8eba6dd8ebf0e2',
-    consumerSecret: 'cs_ccb5d303c1f357413d1142270fe5fded661c6b9e',
-    jwtSecret: 'muTCvDL2kkjlOks6:}<KZ[.qUF]rb6Iev|MQ1<HVL3H&_#$4sm797X[4_7CbS6w4'
+    url: 'https://appprot.whapruebas.com',
+    consumerKey: 'ck_a42e54dee022e07234e930cfdd3c6cf883a24a48',
+    consumerSecret: 'cs_500dc3cff7fb6f0dc3703ae555c5bf7975417b8f'
   }
 };
 
