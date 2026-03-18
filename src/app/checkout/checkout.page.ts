@@ -22,6 +22,7 @@ import {
 import { CartService } from '../services/cart.service';
 import { WoocommerceService } from '../services/woocommerce.service';
 import { environment } from '../../environments/environment';
+import { ThemeService } from '../services/theme.service';
 
 @Component({
   selector: 'app-checkout',
@@ -53,6 +54,7 @@ export class CheckoutPage implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cartService = inject(CartService);
   private woocommerceService = inject(WoocommerceService);
+  private themeService = inject(ThemeService);
 
   isSubmitting = false;
   isCheckingStatus = false;
@@ -140,10 +142,36 @@ export class CheckoutPage implements OnInit, OnDestroy {
       customer_note: value.notes || '',
       billing,
       shipping,
-      line_items: items.map((item) => ({
-        product_id: item.productId,
-        quantity: item.quantity,
-      })),
+      line_items: items.map((item) => {
+        const unit = Number(item.price) || 0;
+        const qty = Number(item.quantity) || 1;
+        const total = (unit * qty).toFixed(2);
+        const meta: Array<{ key: string; value: string }> = [];
+        if (Array.isArray(item.topics) && item.topics.length > 0) {
+          for (const t of item.topics) {
+            const parts: string[] = [];
+            for (const o of t.options || []) {
+              const part = (o.price || 0) > 0 ? `${o.label} (+${(o.price || 0).toFixed(2)})` : o.label;
+              parts.push(part);
+            }
+            if (parts.length > 0) {
+              meta.push({ key: t.label, value: parts.join(', ') });
+            }
+          }
+          try {
+            meta.push({ key: '_topics_json', value: JSON.stringify(item.topics) });
+          } catch {
+            // ignore json error
+          }
+        }
+        return {
+          product_id: item.productId,
+          quantity: qty,
+          subtotal: total,
+          total: total,
+          meta_data: meta,
+        };
+      }),
       coupon_lines: coupon ? [{ code: coupon }] : [],
     };
 
@@ -218,5 +246,9 @@ export class CheckoutPage implements OnInit, OnDestroy {
         return false;
       }
     }
+  }
+
+  toggleTheme() {
+    this.themeService.toggle();
   }
 }

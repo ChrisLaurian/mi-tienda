@@ -1,10 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map } from 'rxjs';
 
+export type CartSelectedOption = { label: string; price?: number };
+export type CartTopic = { label: string; type?: 'checkbox' | 'radio'; options: CartSelectedOption[] };
 export type CartItem = {
   productId: number;
   name: string;
-  price: number;
+  price: number; // unit price including extras
+  basePrice?: number; // original unit price
+  extraTotal?: number; // extras sum per unit
+  topics?: CartTopic[]; // selected topics/options
+  variantKey?: string;
   imageUrl?: string;
   quantity: number;
 };
@@ -26,21 +32,23 @@ export class CartService {
     map((items) => items.reduce((sum, item) => sum + item.quantity, 0))
   );
 
-  readonly totalPrice$ = this.items$.pipe(
-    map((items) => items.reduce((sum, item) => sum + item.quantity * item.price, 0))
-  );
+  readonly totalPrice$ = this.items$.pipe(map((items) => items.reduce((sum, item) => sum + item.quantity * item.price, 0)));
 
-  addProduct(product: any, quantity: number = 1) {
+  addProduct(product: any, quantity: number = 1, opts?: { topics?: CartTopic[]; extraTotal?: number }) {
     const productId = Number(product?.id);
     if (!Number.isFinite(productId)) return;
 
     const name = String(product?.name ?? '');
     const price = Number(product?.price ?? 0);
+    const basePrice = Number.isFinite(price) ? price : 0;
+    const extraTotal = Number(opts?.extraTotal ?? 0) || 0;
+    const finalUnitPrice = basePrice + extraTotal;
     const imageUrl = product?.images?.[0]?.src ? String(product.images[0].src) : undefined;
+    const variantKey = this.makeTopicsKey(opts?.topics || []);
 
     const safeQuantity = Math.max(1, Number(quantity) || 1);
     const nextItems = [...this.itemsSubject.value];
-    const existingIndex = nextItems.findIndex((i) => i.productId === productId);
+    const existingIndex = nextItems.findIndex((i) => i.productId === productId && (i.variantKey || '') === variantKey);
 
     if (existingIndex >= 0) {
       const existing = nextItems[existingIndex];
@@ -49,7 +57,11 @@ export class CartService {
       nextItems.push({
         productId,
         name,
-        price: Number.isFinite(price) ? price : 0,
+        price: finalUnitPrice,
+        basePrice,
+        extraTotal,
+        topics: opts?.topics && opts.topics.length > 0 ? opts.topics : undefined,
+        variantKey,
         imageUrl,
         quantity: safeQuantity,
       });
@@ -111,13 +123,15 @@ export class CartService {
       if (!product) return item;
 
       const name = String(product?.name ?? item.name ?? '');
-      const price = Number(product?.price ?? item.price ?? 0);
+      const basePrice = Number(product?.price ?? item.basePrice ?? item.price ?? 0);
+      const finalUnit = basePrice + Number(item?.extraTotal ?? 0);
       const imageUrl = product?.images?.[0]?.src ? String(product.images[0].src) : item.imageUrl;
 
       return {
         ...item,
         name,
-        price: Number.isFinite(price) ? price : item.price,
+        price: Number.isFinite(finalUnit) ? finalUnit : item.price,
+        basePrice: Number.isFinite(basePrice) ? basePrice : item.basePrice,
         imageUrl,
       };
     });
@@ -154,6 +168,18 @@ export class CartService {
           productId: Number(i?.productId),
           name: String(i?.name ?? ''),
           price: Number(i?.price ?? 0),
+          basePrice: Number.isFinite(Number(i?.basePrice)) ? Number(i?.basePrice) : undefined,
+          extraTotal: Number.isFinite(Number(i?.extraTotal)) ? Number(i?.extraTotal) : undefined,
+          topics: Array.isArray(i?.topics)
+            ? i.topics.map((t: any) => ({
+                label: String(t?.label ?? ''),
+                type: t?.type === 'radio' ? 'radio' : 'checkbox',
+                options: Array.isArray(t?.options)
+                  ? t.options.map((o: any) => ({ label: String(o?.label ?? ''), price: Number(o?.price ?? 0) || 0 }))
+                  : [],
+              }))
+            : undefined,
+          variantKey: String(i?.variantKey ?? ''),
           imageUrl: i?.imageUrl ? String(i.imageUrl) : undefined,
           quantity: Number(i?.quantity ?? 0),
         }))
@@ -161,6 +187,22 @@ export class CartService {
     } catch {
       return [];
     }
+  }
+
+  private makeTopicsKey(topics: CartTopic[]): string {
+    if (!Array.isArray(topics) || topics.length === 0) return '';
+    const norm = topics
+      .map((t) => ({
+        label: String(t?.label ?? '').toLowerCase().trim(),
+        type: t?.type === 'radio' ? 'radio' : 'checkbox',
+        options: Array.isArray(t?.options)
+          ? t.options.map((o) => String(o?.label ?? '').toLowerCase().trim()).filter(Boolean)
+          : [],
+      }))
+      .filter((t) => t.label && t.options.length > 0);
+    norm.sort((a, b) => a.label.localeCompare(b.label));
+    for (const t of norm) t.options.sort((a, b) => a.localeCompare(b));
+    return norm.map((t) => `${t.label}:${t.options.join('|')}`).join('||');
   }
 
   private readCouponFromStorage(): string {

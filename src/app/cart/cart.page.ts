@@ -17,6 +17,7 @@ import {
 } from '@ionic/angular/standalone';
 import { CartService } from '../services/cart.service';
 import { WoocommerceService } from '../services/woocommerce.service';
+import { ThemeService } from '../services/theme.service';
 
 @Component({
   selector: 'app-cart',
@@ -43,6 +44,7 @@ import { WoocommerceService } from '../services/woocommerce.service';
 export class CartPage {
   private cartService = inject(CartService);
   private woocommerceService = inject(WoocommerceService);
+  private themeService = inject(ThemeService);
 
   items$ = this.cartService.items$;
   coupon$ = this.cartService.coupon$;
@@ -78,5 +80,9 @@ export class CartPage {
 
   clearCoupon() {
     this.cartService.clearCoupon();
+  }
+
+  toggleTheme() {
+    this.themeService.toggle();
   }
 }

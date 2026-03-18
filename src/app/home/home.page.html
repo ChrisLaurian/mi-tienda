@@ -4,6 +4,12 @@
       Mi Tienda
     </ion-title>
     <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="toggleTheme()">Tema</ion-button>
+      <ion-select interface="popover" [value]="activeSiteId" (ionChange)="onSiteChange($event.detail.value)">
+        <ion-select-option *ngFor="let s of sites" [value]="s.id">{{ s.url }}</ion-select-option>
+      </ion-select>
+      <ion-button fill="clear" (click)="changeKeysForActiveSite()">Cambiar llaves</ion-button>
+      <ion-button fill="clear" (click)="runDiagnostics()">Diagnóstico</ion-button>
       <ion-button fill="clear" (click)="showPromoPreview()">Probar 20%</ion-button>
       <ion-button routerLink="/cart">
         Carrito

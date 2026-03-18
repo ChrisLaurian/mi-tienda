@@ -5,6 +5,7 @@
     </ion-buttons>
     <ion-title>Carrito</ion-title>
     <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="toggleTheme()">Tema</ion-button>
       <ion-button fill="clear" (click)="clear()">Vaciar</ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -24,7 +25,24 @@
         </ion-thumbnail>
         <ion-label>
           <div class="item-title">{{ item.name }}</div>
-          <div class="item-subtitle">${{ item.price.toFixed(2) }}</div>
+          <div class="item-subtitle">
+            <ng-container *ngIf="item.basePrice !== undefined; else singlePrice">
+              <span>Base: {{ (item.basePrice ?? 0) | currency }}</span>
+              <span *ngIf="(item.extraTotal ?? 0) > 0"> • Extra: {{ item.extraTotal | currency }}</span>
+              <span> • Unit: {{ item.price | currency }}</span>
+            </ng-container>
+            <ng-template #singlePrice>
+              {{ item.price | currency }}
+            </ng-template>
+          </div>
+          <div *ngIf="item.topics?.length" class="item-options">
+            <div *ngFor="let t of item.topics">
+              <strong>{{ t.label }}:</strong>
+              <span *ngFor="let o of t.options; let last = last">
+                {{ o.label }}<span *ngIf="(o.price || 0) > 0"> (+{{ o.price | currency }})</span><span *ngIf="!last">, </span>
+              </span>
+            </div>
+          </div>
           <div class="qty-row">
             <ion-button size="small" (click)="decrease(item.productId, item.quantity)">-</ion-button>
             <ion-badge color="medium">{{ item.quantity }}</ion-badge>

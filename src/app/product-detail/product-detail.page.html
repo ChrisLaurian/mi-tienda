@@ -5,6 +5,7 @@
     </ion-buttons>
     <ion-title>Detalle</ion-title>
     <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="toggleTheme()">Tema</ion-button>
       <ion-button routerLink="/cart">
         Carrito
         <ion-badge *ngIf="(cartCount$ | async) as count" color="primary">{{ count }}</ion-badge>
@@ -33,6 +34,29 @@
 
     <h1 class="product-detail-title">{{ product.name }}</h1>
     <div class="product-detail-price" [innerHTML]="product.price_html"></div>
+    <div class="product-detail-extra ion-padding-start ion-padding-end">
+      <div>Suplemento: {{ selectedExtraTotal() | currency }}</div>
+      <div>Total: {{ (getBasePriceNumber() + selectedExtraTotal()) | currency }}</div>
+    </div>
+    <ng-container *ngFor="let topic of topicsToRender">
+      <div class="ion-padding">
+        <h2>
+          {{ topic.label }}
+          <span *ngIf="topic.required" aria-hidden="true">*</span>
+        </h2>
+        <ion-list>
+          <ion-item *ngFor="let opt of topic.options">
+            <ion-label>
+              {{ opt.label }}
+              <span *ngIf="(opt.price || 0) > 0">(+{{ opt.price | currency }})</span>
+            </ion-label>
+            <ion-checkbox slot="end"
+              [checked]="selectedByTopic[topic.key]?.has(opt.id)"
+              (ionChange)="toggleOption(topic.key, opt.id, $event.detail.checked)"></ion-checkbox>
+          </ion-item>
+        </ion-list>
+      </div>
+    </ng-container>
     <ion-button expand="block" (click)="addToCart()">Agregar al carrito</ion-button>
     <div class="product-detail-description" [innerHTML]="product.description"></div>
   </div>
