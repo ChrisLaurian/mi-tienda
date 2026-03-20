@@ -2,6 +2,12 @@
   padding: 8px 16px 0;
 }
 
+ion-button.cart-button {
+  ion-badge {
+    margin-left: 6px;
+  }
+}
+
 .category-chips {
   display: flex;
   gap: 8px;
@@ -71,4 +77,61 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 3.6em;
+}
+
+ion-footer {
+  --background: var(--ion-background-color);
+  --border-color: var(--ion-border-color, #e0e0e0);
+  --color: var(--ion-text-color);
+}
+
+ion-footer ion-toolbar {
+  --background: var(--ion-background-color);
+  --border-color: var(--ion-border-color, #e0e0e0);
+}
+
+.footer-title {
+  font-size: 13px;
+  color: var(--ion-text-color);
+  opacity: 0.6;
+  text-align: center;
+}
+
+ion-menu {
+  --background: var(--ion-background-color);
+}
+
+ion-menu ion-content {
+  --background: var(--ion-background-color);
+}
+
+ion-menu ion-list {
+  background: transparent;
+  padding: 8px 0;
+}
+
+ion-menu ion-item {
+  --background: transparent;
+  --color: var(--ion-text-color);
+  --border-color: var(--ion-border-color, #e0e0e0);
+  margin: 4px 8px;
+  border-radius: 8px;
+}
+
+ion-menu ion-item:active {
+  --background: var(--ion-color-light);
+}
+
+ion-menu ion-icon {
+  color: var(--ion-color-primary);
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--ion-border-color, #e0e0e0);
+  margin: 8px 16px;
+}
+
+ion-button.cart-button {
+  position: relative;
 }

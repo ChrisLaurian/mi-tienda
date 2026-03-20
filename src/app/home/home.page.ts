@@ -25,6 +25,13 @@ import {
   IonSpinner,
   IonRefresher,
   IonRefresherContent,
+  IonFooter,
+  IonIcon,
+  IonMenu,
+  IonMenuButton,
+  IonMenuToggle,
+  IonList,
+  IonItem,
 } from '@ionic/angular/standalone';
 import { WoocommerceService } from '../services/woocommerce.service';
 import { CartService } from '../services/cart.service';
@@ -39,9 +46,11 @@ import { ThemeService } from '../services/theme.service';
   imports: [
     CommonModule,
     RouterLink,
-    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonHeader, IonToolbar, IonTitle, IonContent, IonFooter,
     IonSelect, IonSelectOption,
-    IonButtons, IonButton, IonBadge,
+    IonButtons, IonButton, IonBadge, IonIcon,
+    IonMenu, IonMenuButton, IonMenuToggle,
+    IonList, IonItem,
     IonSearchbar,
     IonChip, IonLabel,
     IonGrid, IonRow, IonCol,

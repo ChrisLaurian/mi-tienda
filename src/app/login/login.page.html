@@ -1,0 +1,62 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Mi Tienda</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="toggleTheme()">Tema</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+          <path d="M3 6h18"></path>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </div>
+      <h1>Bienvenido</h1>
+      <p>Inicia sesión para continuar</p>
+    </div>
+
+    <div class="login-form">
+      <ion-item class="login-input">
+        <ion-label position="floating">Usuario</ion-label>
+        <ion-input 
+          type="text" 
+          [(ngModel)]="username"
+          placeholder="Ingresa tu usuario"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item class="login-input">
+        <ion-label position="floating">Contraseña</ion-label>
+        <ion-input 
+          type="password" 
+          [(ngModel)]="password"
+          placeholder="Ingresa tu contraseña"
+        ></ion-input>
+      </ion-item>
+
+      <div *ngIf="errorMessage" class="error-message">
+        <ion-text color="danger">{{ errorMessage }}</ion-text>
+      </div>
+
+      <ion-button 
+        expand="block" 
+        class="login-button"
+        (click)="onLogin()"
+        [disabled]="isLoading"
+      >
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">Iniciar Sesión</span>
+      </ion-button>
+
+      <div class="login-hint">
+        <p>Demo: Admin / Root</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

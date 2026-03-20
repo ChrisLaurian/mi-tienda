@@ -20,7 +20,7 @@ export class ThemeService {
   }
 
   toggle(): 'light' | 'dark' {
-    const isDark = document.documentElement.classList.contains(DARK_CLASS);
+    const isDark = document.body.classList.contains(DARK_CLASS);
     const next = !isDark;
     this.apply(next);
     this.write(next ? 'dark' : 'light');
@@ -28,7 +28,7 @@ export class ThemeService {
   }
 
   isDark(): boolean {
-    return document.documentElement.classList.contains(DARK_CLASS);
+    return document.body.classList.contains(DARK_CLASS) || document.documentElement.classList.contains(DARK_CLASS);
   }
 
   set(mode: 'light' | 'dark') {
@@ -37,11 +37,13 @@ export class ThemeService {
   }
 
   private apply(dark: boolean) {
-    const el = document.documentElement;
+    const body = document.body;
     if (dark) {
-      el.classList.add(DARK_CLASS);
+      document.documentElement.classList.add(DARK_CLASS);
+      body.classList.add(DARK_CLASS);
     } else {
-      el.classList.remove(DARK_CLASS);
+      document.documentElement.classList.remove(DARK_CLASS);
+      body.classList.remove(DARK_CLASS);
     }
   }
 

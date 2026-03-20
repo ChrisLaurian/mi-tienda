@@ -1,25 +1,53 @@
+<ion-menu side="start" menuId="main-menu" contentId="main-content">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Menú</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-list>
+      <ion-item routerLink="/home" routerDirection="root" lines="none">
+        <ion-icon name="home-outline" slot="start"></ion-icon>
+        <ion-label>Inicio</ion-label>
+      </ion-item>
+      <ion-item routerLink="/profile" routerDirection="root" lines="none">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-label>Mi Perfil</ion-label>
+      </ion-item>
+      <ion-item routerLink="/login" routerDirection="root" lines="none">
+        <ion-icon name="log-in-outline" slot="start"></ion-icon>
+        <ion-label>Iniciar Sesión</ion-label>
+      </ion-item>
+      <ion-item routerLink="/cart" routerDirection="root" lines="none">
+        <ion-icon name="cart-outline" slot="start"></ion-icon>
+        <ion-label>Carrito</ion-label>
+        <ion-badge *ngIf="(cartCount$ | async) as count" color="primary" slot="end">{{ count }}</ion-badge>
+      </ion-item>
+    </ion-list>
+    <div class="menu-divider"></div>
+    <ion-list>
+      <ion-item button (click)="toggleTheme()" lines="none">
+        <ion-icon name="moon-outline" slot="start"></ion-icon>
+        <ion-label>Cambiar Tema</ion-label>
+      </ion-item>
+      <ion-item button (click)="showPromoPreview()" lines="none">
+        <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+        <ion-label>Probar 20%</ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>
+
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Mi Tienda
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="toggleTheme()">Tema</ion-button>
-      <ion-select interface="popover" [value]="activeSiteId" (ionChange)="onSiteChange($event.detail.value)">
-        <ion-select-option *ngFor="let s of sites" [value]="s.id">{{ s.url }}</ion-select-option>
-      </ion-select>
-      <ion-button fill="clear" (click)="changeKeysForActiveSite()">Cambiar llaves</ion-button>
-      <ion-button fill="clear" (click)="runDiagnostics()">Diagnóstico</ion-button>
-      <ion-button fill="clear" (click)="showPromoPreview()">Probar 20%</ion-button>
-      <ion-button routerLink="/cart">
-        Carrito
-        <ion-badge *ngIf="(cartCount$ | async) as count" color="primary">{{ count }}</ion-badge>
-      </ion-button>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
     </ion-buttons>
+    <ion-title>Mi Tienda</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" id="main-content">
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
@@ -84,9 +112,6 @@
             </ion-card-header>
             <ion-card-content class="product-card-content">
               <div class="product-description" [innerHTML]="product.short_description"></div>
-              <ion-button size="small" expand="block" (click)="addToCart(product, $event)">
-                Agregar al carrito
-              </ion-button>
             </ion-card-content>
           </ion-card>
         </ion-col>
@@ -101,3 +126,9 @@
     </div>
   </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-title class="footer-title">Mi Tienda © 2026</ion-title>
+  </ion-toolbar>
+</ion-footer>
