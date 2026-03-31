@@ -50,33 +50,11 @@ export class LoginPage implements OnInit {
   }
 
   async forgotPassword() {
-    const alert = await this.alertController.create({
-      header: 'Recuperar Contraseña',
-      message: 'Ingresa tu correo electrónico para recibir un enlace de recuperación.',
-      inputs: [
-        {
-          name: 'email',
-          type: 'email',
-          placeholder: 'Correo electrónico',
-        },
-      ],
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Enviar',
-          handler: (data) => {
-            if (data.email) {
-              this.showMessage('Se ha enviado un enlace de recuperación a tu correo.');
-            }
-          },
-        },
-      ],
-    });
-    await alert.present();
+    this.router.navigate(['/set-password']);
   }
 
   goToSignup() {
-    this.showMessage('Próximamente: Registro de usuarios');
+    this.router.navigate(['/register']);
   }
 
   async showMessage(message: string) {

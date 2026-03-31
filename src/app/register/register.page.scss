@@ -1,0 +1,86 @@
+.register-content {
+  --background: #f7d377; /* Color amarillo de fondo del top */
+}
+
+.register-top-section {
+  background: #f7d377;
+  padding: 40px 20px 20px 20px;
+  text-align: center;
+  position: relative;
+  color: #5d4037;
+}
+
+.back-btn {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  svg path {
+    stroke: #5d4037;
+  }
+}
+
+.page-title {
+  color: #5d4037;
+  font-size: 32px;
+  margin: 0;
+  font-weight: bold;
+}
+
+.register-bottom-section {
+  margin-top: 20px;
+  padding: 0;
+  height: 100%;
+}
+
+.register-card {
+  background: #fdf5d6; /* Color crema claro de la tarjeta */
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  padding: 30px;
+  min-height: 100%;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  color: #5d4037;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.native-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 15px;
+  border: none;
+  background: #fff; /* Campos de texto blancos */
+  font-size: 16px;
+  color: #333;
+}
+
+.signup-btn {
+  --background: #f26b35; /* Botón naranja */
+  --border-radius: 25px;
+  font-weight: bold;
+  height: 50px;
+  margin-top: 20px;
+}
+
+.terms-text {
+  font-size: 12px;
+  color: #5d4037;
+  text-align: center;
+  margin-top: 15px;
+  
+  a {
+    color: #f26b35;
+    text-decoration: underline;
+  }
+}

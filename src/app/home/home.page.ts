@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   IonContent,
   IonButton,
@@ -27,12 +27,13 @@ import { ThemeService } from '../services/theme.service';
 })
 export class HomePage {
   private themeService = inject(ThemeService);
+  private router = inject(Router);
 
   toggleTheme() {
     this.themeService.toggle();
   }
 
   onSignUp() {
-    alert('Próximamente: Registro de usuarios');
+    this.router.navigate(['/register']);
   }
 }
