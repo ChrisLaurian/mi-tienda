@@ -1,71 +1,118 @@
-.profile-header {
+.profile-content {
+  --background: #FFFFFF;
+}
+
+// Yellow Header Section
+.header-section {
+  background: linear-gradient(135deg, #FFD54F 0%, #FFC107 100%);
+  padding: 16px 16px 50px;
+  border-radius: 0 0 30px 30px;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  
+  ion-icon {
+    font-size: 24px;
+    color: white;
+  }
+}
+
+.page-title {
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
   text-align: center;
-  padding: 20px 0 30px;
 }
 
-.avatar-container {
+.header-spacer {
+  width: 40px;
+}
+
+// Profile Image
+.profile-image-container {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-image-wrapper {
   position: relative;
-  display: inline-block;
-}
-
-.profile-avatar {
   width: 100px;
   height: 100px;
-  margin: 0 auto 16px;
-  border: 3px solid var(--ion-color-primary);
 }
 
-.change-photo-btn {
+.profile-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.edit-photo-btn {
   position: absolute;
-  bottom: 8px;
-  right: calc(50% - 60px);
-  --color: var(--ion-color-primary);
-  background: var(--ion-background-color);
+  bottom: -5px;
+  right: -5px;
+  width: 32px;
+  height: 32px;
+  background: #FF6B35;
+  border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
 }
 
-.profile-name {
-  margin: 0 0 4px;
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--ion-text-color);
+// Form Section
+.form-section {
+  padding: 24px 20px;
+  margin-top: -20px;
+  background: #FFFFFF;
+  border-radius: 30px 30px 0 0;
 }
 
-.profile-email {
-  margin: 0 0 4px;
-  font-size: 14px;
-  opacity: 0.7;
-  color: var(--ion-text-color);
-}
-
-.profile-member {
-  margin: 0;
-  font-size: 12px;
-  opacity: 0.5;
-  color: var(--ion-text-color);
-}
-
+// Points Card
 .points-card {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 100%);
+  border-radius: 16px;
+  padding: 16px;
   margin-bottom: 24px;
+  border: 1px solid #FFD54F;
 }
 
 .points-content {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .points-icon {
   width: 48px;
   height: 48px;
-  background: var(--ion-color-primary);
+  background: #FF6B35;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
 }
 
 .points-info {
@@ -76,152 +123,64 @@
 
 .points-label {
   font-size: 12px;
-  opacity: 0.7;
-  color: var(--ion-text-color);
-}
-
-.points-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--ion-color-primary);
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 24px 0 12px;
-  color: var(--ion-text-color);
-}
-
-.account-form {
-  background: var(--ion-card-background);
-  border-radius: 12px;
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-
-.form-item {
-  --background: transparent;
-  --border-color: var(--ion-border-color, #e0e0e0);
-  --padding-start: 16px;
-  --padding-end: 8px;
-  --inner-padding-end: 8px;
-}
-
-.form-item:not(:last-child) {
-  --border-width: 0 0 1px 0;
-}
-
-.form-item ion-icon {
-  color: var(--ion-color-primary);
-  margin-right: 12px;
-  font-size: 20px;
-}
-
-.form-item .item-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
-
-.form-item .field-label {
-  font-size: 11px;
-  color: var(--ion-text-color);
-  opacity: 0.6;
+  color: #666;
   margin-bottom: 2px;
 }
 
-.form-item .field-value {
-  font-size: 15px;
-  color: var(--ion-text-color);
+.points-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
 }
 
-.form-item ion-button {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --color: var(--ion-color-primary);
-}
-
-.edit-profile-btn {
-  margin-bottom: 16px;
-  --border-radius: 12px;
-}
-
-.orders-list {
+// Form Fields
+.form-fields {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.order-card {
-  margin: 0;
-}
-
-.order-card ion-card-content {
-  padding: 12px 16px;
-}
-
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.order-id {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--ion-text-color);
-}
-
-.order-details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--ion-text-color);
-  opacity: 0.8;
-}
-
-.order-total {
-  font-weight: 600;
-}
-
-.menu-list {
+  gap: 16px;
   margin-bottom: 24px;
-  background: transparent;
 }
 
-.menu-list ion-item {
-  --background: var(--ion-card-background);
-  --border-color: var(--ion-border-color, #e0e0e0);
-  margin-bottom: 4px;
-  border-radius: 8px;
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.menu-list ion-icon {
-  color: var(--ion-color-primary);
-}
-
-.logout-section {
-  margin-top: 24px;
-}
-
-ion-footer {
-  --background: var(--ion-background-color);
-  --border-color: var(--ion-border-color, #e0e0e0);
-  --color: var(--ion-text-color);
-}
-
-ion-footer ion-toolbar {
-  --background: var(--ion-background-color);
-  --border-color: var(--ion-border-color, #e0e0e0);
-}
-
-.footer-title {
+.field-label {
   font-size: 13px;
-  color: var(--ion-text-color);
-  opacity: 0.6;
-  text-align: center;
+  font-weight: 600;
+  color: #333;
+}
+
+.field-value-box {
+  background: #FFF8E1;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: #333;
+  border: 1px solid #FFE082;
+}
+
+// Update Profile Button
+.update-profile-btn {
+  --background: #FF6B35;
+  --background-hover: #E85D2C;
+  --border-radius: 12px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+// Logout Button
+.logout-btn {
+  --color: #FF6B35;
+  --border-color: #FF6B35;
+  --border-radius: 12px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  font-size: 16px;
 }

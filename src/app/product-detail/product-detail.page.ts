@@ -1,20 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  IonBadge,
-  IonBackButton,
-  IonButton,
-  IonButtons,
-  IonCheckbox,
   IonContent,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonHeader,
+  IonIcon,
   IonSpinner,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/angular/standalone';
 import { WoocommerceService } from '../services/woocommerce.service';
 import { CartService } from '../services/cart.service';
@@ -31,23 +21,14 @@ import { ThemeService } from '../services/theme.service';
   imports: [
     CommonModule,
     RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonBackButton,
-    IonButton,
-    IonBadge,
     IonContent,
+    IonIcon,
     IonSpinner,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonCheckbox,
   ],
 })
 export class ProductDetailPage implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private woocommerceService = inject(WoocommerceService);
   private cartService = inject(CartService);
   private topicsService = inject(TopicsService);
@@ -59,6 +40,8 @@ export class ProductDetailPage implements OnInit {
   cartCount$ = this.cartService.totalQuantity$;
   topicsToRender: TopicGroup[] = [];
   selectedByTopic: Record<string, Set<string>> = {};
+  quantity = 1;
+  isFavorite = false;
 
   ngOnInit() {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -104,7 +87,7 @@ export class ProductDetailPage implements OnInit {
       })
       .filter(Boolean) as Array<{ label: string; type?: 'checkbox' | 'radio'; options: Array<{ label: string; price?: number }> }>;
     const extra = this.selectedExtraTotal();
-    this.cartService.addProduct(this.product, 1, { topics: topicsPayload, extraTotal: extra });
+    this.cartService.addProduct(this.product, this.quantity, { topics: topicsPayload, extraTotal: extra });
     this.selectedByTopic = {};
     this.topicsToRender.forEach((t) => (this.selectedByTopic[t.key] = new Set<string>()));
   }
@@ -228,5 +211,28 @@ export class ProductDetailPage implements OnInit {
 
   toggleTheme() {
     this.themeService.toggle();
+  }
+
+  goBack() {
+    this.router.navigate(['/store']);
+  }
+
+  increaseQuantity() {
+    this.quantity++;
+  }
+
+  decreaseQuantity() {
+    if (this.quantity > 1) {
+      this.quantity--;
+    }
+  }
+
+  toggleFavorite() {
+    this.isFavorite = !this.isFavorite;
+  }
+
+  getProductRating(): string {
+    // Return a default rating or from product data if available
+    return this.product?.average_rating || '5.0';
   }
 }

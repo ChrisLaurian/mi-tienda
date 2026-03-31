@@ -17,9 +17,9 @@ export class WoocommerceService {
   constructor() { }
 
   private getSites(): Array<{ id: string; name: string; url: string; usaIndexPhp?: boolean; authMode?: 'query' | 'header' }> {
-    const envSites = environment?.woocommerce?.sites as Array<{ id: string; name: string; url: string; usaIndexPhp?: boolean; authMode?: 'query' | 'header' }>;
+    const envSites = (environment as any)?.woocommerceSites;
     if (Array.isArray(envSites) && envSites.length > 0) {
-      return envSites.map((s) => {
+      return envSites.map((s: any) => {
         const mode = s?.authMode === 'header' ? 'header' : s?.authMode === 'query' ? 'query' : undefined;
         return { ...s, authMode: mode };
       });
@@ -36,7 +36,7 @@ export class WoocommerceService {
 
   getActiveSite() {
     const sites = this.getSites();
-    const defaultId = environment?.woocommerce?.defaultSiteId || 'main';
+    const defaultId = (environment as any)?.woocommerceDefaultSiteId || 'main';
     const storedId = typeof localStorage !== 'undefined' ? (localStorage.getItem(this.STORAGE_ACTIVE_SITE) || defaultId) : defaultId;
     return sites.find((s) => s.id === storedId) || sites[0];
   }
@@ -71,7 +71,7 @@ export class WoocommerceService {
 
   private getSiteKeys(site: { id: string; url: string }) {
     const mainUrl = environment.woocommerce.url;
-    const defaultId = environment?.woocommerce?.defaultSiteId || 'main';
+    const defaultId = (environment as any)?.woocommerceDefaultSiteId || 'main';
     if (site.id === defaultId || site.url === mainUrl) {
       return {
         key: environment.woocommerce.consumerKey,

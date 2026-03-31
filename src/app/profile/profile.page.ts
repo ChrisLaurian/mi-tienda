@@ -1,25 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
-  IonButtons,
-  IonButton,
-  IonBackButton,
   IonIcon,
-  IonAvatar,
-  IonList,
-  IonItem,
-  IonLabel,
+  IonButton,
   IonBadge,
-  IonCard,
-  IonCardContent,
-  IonFooter,
-  IonInput,
   AlertController,
+  MenuController,
 } from '@ionic/angular/standalone';
 import { CartService } from '../services/cart.service';
 import { ThemeService } from '../services/theme.service';
@@ -32,126 +20,39 @@ import { ThemeService } from '../services/theme.service';
   imports: [
     CommonModule,
     RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
-    IonButtons,
-    IonButton,
-    IonBackButton,
     IonIcon,
-    IonAvatar,
-    IonList,
-    IonItem,
-    IonLabel,
+    IonButton,
     IonBadge,
-    IonCard,
-    IonCardContent,
-    IonFooter,
-    IonInput,
   ],
 })
-export class ProfilePage {
+export class ProfilePage implements OnInit {
   private cartService = inject(CartService);
   private themeService = inject(ThemeService);
   private alertController = inject(AlertController);
+  private menuController = inject(MenuController);
+  private router = inject(Router);
   cartCount$ = this.cartService.totalQuantity$;
 
-  user = {
-    name: 'Usuario Mi Tienda',
-    email: 'usuario@mitienda.com',
-    avatar: 'https://ui-avatars.com/api/?name=Usuario+MT&background=005cbb&color=fff&size=128',
-    points: 1250,
-    memberSince: 'Enero 2024',
-  };
+  ngOnInit() {
+    this.menuController.enable(true, 'main-menu');
+  }
 
-  orders = [
-    { id: 'ORD-001', date: '15 Mar 2026', total: 45000, status: 'Entregado' },
-    { id: 'ORD-002', date: '10 Mar 2026', total: 32000, status: 'Enviado' },
-    { id: 'ORD-003', date: '05 Mar 2026', total: 28500, status: 'Entregado' },
-    { id: 'ORD-004', date: '28 Feb 2026', total: 67000, status: 'Entregado' },
-  ];
+  user = {
+    name: 'John Smith',
+    email: 'johnsmith@example.com',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
+    dateOfBirth: '09 / 10 / 1991',
+    phone: '+123 567 89000',
+    points: 1250,
+  };
 
   toggleTheme() {
     this.themeService.toggle();
   }
 
-  async editField(field: string) {
-    const currentValue = this.user[field as keyof typeof this.user];
-    const title = field === 'name' ? 'Editar Nombre' : 'Editar Correo';
-    const placeholder = field === 'name' ? 'Tu nombre' : 'Tu correo';
-
-    const alert = await this.alertController.create({
-      header: title,
-      inputs: [
-        {
-          name: 'value',
-          type: 'text',
-          value: currentValue as string,
-          placeholder: placeholder,
-        },
-      ],
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Guardar',
-          handler: (data) => {
-            if (data.value && data.value.trim()) {
-              this.user = { ...this.user, [field]: data.value.trim() };
-            }
-          },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
-  async changePassword() {
-    const alert = await this.alertController.create({
-      header: 'Cambiar Contraseña',
-      inputs: [
-        {
-          name: 'current',
-          type: 'password',
-          placeholder: 'Contraseña actual',
-        },
-        {
-          name: 'new',
-          type: 'password',
-          placeholder: 'Nueva contraseña',
-        },
-        {
-          name: 'confirm',
-          type: 'password',
-          placeholder: 'Confirmar nueva contraseña',
-        },
-      ],
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Cambiar',
-          handler: (data) => {
-            if (!data.current || !data.new || !data.confirm) {
-              this.showMessage('Completa todos los campos');
-              return false;
-            }
-            if (data.new !== data.confirm) {
-              this.showMessage('Las contraseñas no coinciden');
-              return false;
-            }
-            if (data.new.length < 6) {
-              this.showMessage('La contraseña debe tener al menos 6 caracteres');
-              return false;
-            }
-            this.showMessage('Contraseña actualizada correctamente');
-            return true;
-          },
-        },
-      ],
-    });
-
-    await alert.present();
+  goBack() {
+    this.router.navigate(['/store']);
   }
 
   async editProfile() {
@@ -170,6 +71,18 @@ export class ProfilePage {
           value: this.user.email,
           placeholder: 'Correo electrónico',
         },
+        {
+          name: 'phone',
+          type: 'tel',
+          value: this.user.phone,
+          placeholder: 'Número de teléfono',
+        },
+        {
+          name: 'dateOfBirth',
+          type: 'text',
+          value: this.user.dateOfBirth,
+          placeholder: 'Fecha de nacimiento',
+        },
       ],
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
@@ -177,7 +90,13 @@ export class ProfilePage {
           text: 'Guardar',
           handler: (data) => {
             if (data.name && data.email) {
-              this.user = { ...this.user, name: data.name, email: data.email };
+              this.user = { 
+                ...this.user, 
+                name: data.name, 
+                email: data.email,
+                phone: data.phone || this.user.phone,
+                dateOfBirth: data.dateOfBirth || this.user.dateOfBirth,
+              };
               this.showMessage('Perfil actualizado correctamente');
             }
           },
@@ -195,18 +114,5 @@ export class ProfilePage {
       buttons: ['OK'],
     });
     await alert.present();
-  }
-
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Entregado':
-        return 'success';
-      case 'Enviado':
-        return 'primary';
-      case 'Procesando':
-        return 'warning';
-      default:
-        return 'medium';
-    }
   }
 }

@@ -1,67 +1,105 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Detalle</ion-title>
-    <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="toggleTheme()">Tema</ion-button>
-      <ion-button routerLink="/cart">
-        Carrito
-        <ion-badge *ngIf="(cartCount$ | async) as count" color="primary">{{ count }}</ion-badge>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="product-content">
+  <!-- Yellow Header Section -->
+  <div class="header-section">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <ion-icon name="chevron-back"></ion-icon>
+      </button>
+      <h1 class="page-title">{{ product?.name || 'Producto' }}</h1>
+      <button class="favorite-btn">
+        <ion-icon name="heart-outline"></ion-icon>
+      </button>
+    </div>
+    <div class="rating-badge" *ngIf="product">
+      <ion-icon name="star"></ion-icon>
+      <span>{{ getProductRating() }}</span>
+    </div>
+  </div>
 
-<ion-content [fullscreen]="true">
-  <div *ngIf="isLoading" class="ion-text-center ion-padding">
-    <ion-spinner name="crescent"></ion-spinner>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Cargando producto...</p>
   </div>
 
-  <div *ngIf="!isLoading && product" class="product-detail ion-padding">
-    <div class="product-detail-image-wrapper">
-      <img
+  <!-- Product Content -->
+  <div *ngIf="!isLoading && product" class="product-content-section">
+    <!-- Product Image Card -->
+    <div class="product-image-card">
+      <img 
         *ngIf="product.images && product.images.length > 0"
-        class="product-detail-image"
-        [src]="product.images[0].src"
+        [src]="product.images[0].src" 
         [alt]="product.name"
-        loading="lazy"
+        class="product-image"
       />
-      <div *ngIf="!product.images || product.images.length === 0" class="product-detail-image product-detail-image--placeholder"></div>
+      <div *ngIf="!product.images || product.images.length === 0" class="product-image-placeholder">
+        <ion-icon name="image-outline"></ion-icon>
+      </div>
     </div>
 
-    <h1 class="product-detail-title">{{ product.name }}</h1>
-    <div class="product-detail-price" [innerHTML]="product.price_html"></div>
-    <div class="product-detail-extra ion-padding-start ion-padding-end">
-      <div>Suplemento: {{ selectedExtraTotal() | currency }}</div>
-      <div>Total: {{ (getBasePriceNumber() + selectedExtraTotal()) | currency }}</div>
+    <!-- Price and Quantity -->
+    <div class="price-section">
+      <span class="product-price">${{ getBasePriceNumber().toFixed(2) }}</span>
+      <div class="quantity-selector">
+        <button class="qty-btn minus" (click)="decreaseQuantity()">
+          <ion-icon name="remove"></ion-icon>
+        </button>
+        <span class="qty-value">{{ quantity }}</span>
+        <button class="qty-btn plus" (click)="increaseQuantity()">
+          <ion-icon name="add"></ion-icon>
+        </button>
+      </div>
     </div>
-    <ng-container *ngFor="let topic of topicsToRender">
-      <div class="ion-padding">
-        <h2>
-          {{ topic.label }}
-          <span *ngIf="topic.required" aria-hidden="true">*</span>
-        </h2>
-        <ion-list>
-          <ion-item *ngFor="let opt of topic.options">
-            <ion-label>
-              {{ opt.label }}
-              <span *ngIf="(opt.price || 0) > 0">(+{{ opt.price | currency }})</span>
-            </ion-label>
-            <ion-checkbox slot="end"
-              [checked]="selectedByTopic[topic.key]?.has(opt.id)"
-              (ionChange)="toggleOption(topic.key, opt.id, $event.detail.checked)"></ion-checkbox>
-          </ion-item>
-        </ion-list>
+
+    <!-- Product Info -->
+    <div class="product-info">
+      <h2 class="product-name">{{ product.name }}</h2>
+      <p class="product-description" [innerHTML]="product.short_description || product.description"></p>
+    </div>
+
+    <!-- Toppings/Options Section -->
+    <ng-container *ngIf="topicsToRender.length > 0">
+      <div class="toppings-section">
+        <h3 class="section-title">Toppings</h3>
+        <ng-container *ngFor="let topic of topicsToRender">
+          <div class="topping-item" *ngFor="let opt of topic.options">
+            <div class="topping-info">
+              <span class="topping-name">{{ opt.label }}</span>
+              <span class="topping-price">${{ (opt.price || 0).toFixed(2) }}</span>
+            </div>
+            <button 
+              class="topping-radio"
+              [class.selected]="selectedByTopic[topic.key]?.has(opt.id)"
+              (click)="toggleOption(topic.key, opt.id, !selectedByTopic[topic.key]?.has(opt.id))">
+              <div class="radio-inner"></div>
+            </button>
+          </div>
+        </ng-container>
       </div>
     </ng-container>
-    <ion-button expand="block" (click)="addToCart()">Agregar al carrito</ion-button>
-    <div class="product-detail-description" [innerHTML]="product.description"></div>
+
+    <!-- Total Price -->
+    <div class="total-section" *ngIf="selectedExtraTotal() > 0">
+      <span class="total-label">Total con opciones:</span>
+      <span class="total-price">${{ (getBasePriceNumber() + selectedExtraTotal()).toFixed(2) }}</span>
+    </div>
   </div>
 
-  <div *ngIf="!isLoading && !product" class="ion-text-center ion-padding">
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !product" class="error-container">
+    <ion-icon name="sad-outline"></ion-icon>
     <p>No se pudo cargar el producto.</p>
+  </div>
+
+  <!-- Add to Cart Button (Fixed at bottom) -->
+  <div class="add-to-cart-section" *ngIf="!isLoading && product">
+    <button class="add-to-cart-btn" (click)="addToCart()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L21 2H6Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 6H21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Add to Cart
+    </button>
   </div>
 </ion-content>
