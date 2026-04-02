@@ -1,28 +1,28 @@
 {
   "/proxy-wc/main": {
-    "target": "https://appprot.whapruebas.com/index.php/wp-json",
+    "target": "https://appprot.whapruebas.com",
     "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
-      "^/proxy-wc/main": ""
+      "^/proxy-wc/main": "/index.php"
     },
     "logLevel": "debug"
   },
   "/proxy-wc/test": {
-    "target": "https://appprot.whapruebas.com/test/index.php/wp-json",
+    "target": "https://appprot.whapruebas.com",
     "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
-      "^/proxy-wc/test": ""
+      "^/proxy-wc/test": "/test/index.php"
     },
     "logLevel": "debug"
   },
   "/proxy-wc/test2": {
-    "target": "https://appprot.whapruebas.com/test2/index.php/wp-json",
+    "target": "https://appprot.whapruebas.com",
     "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
-      "^/proxy-wc/test2": ""
+      "^/proxy-wc/test2": "/test2/index.php"
     },
     "logLevel": "debug"
   }

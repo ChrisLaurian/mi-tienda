@@ -10,6 +10,7 @@ import {
   MenuController,
 } from '@ionic/angular/standalone';
 import { CartService } from '../services/cart.service';
+import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
 
 @Component({
@@ -29,23 +30,44 @@ import { ThemeService } from '../services/theme.service';
 export class ProfilePage implements OnInit {
   private cartService = inject(CartService);
   private themeService = inject(ThemeService);
+  private authService = inject(AuthService);
   private alertController = inject(AlertController);
   private menuController = inject(MenuController);
   private router = inject(Router);
   cartCount$ = this.cartService.totalQuantity$;
 
+  user: any = {
+    name: 'Cargando...',
+    email: '...',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
+    dateOfBirth: 'N/A',
+    phone: 'N/A',
+    points: 0,
+  };
+
   ngOnInit() {
     this.menuController.enable(true, 'main-menu');
+    this.loadUserData();
   }
 
-  user = {
-    name: 'John Smith',
-    email: 'johnsmith@example.com',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
-    dateOfBirth: '09 / 10 / 1991',
-    phone: '+123 567 89000',
-    points: 1250,
-  };
+  loadUserData() {
+    this.authService.getCurrentUser().subscribe({
+      next: (data: any) => {
+        this.user = {
+          name: data.name,
+          email: data.email,
+          avatar: data.avatar_urls?.['96'] || this.user.avatar,
+          dateOfBirth: data.meta?.date_of_birth || 'No disponible',
+          phone: data.meta?.phone || 'No disponible',
+          points: data.meta?.points || 0
+        };
+      },
+      error: (err) => {
+        console.error('Profile load error:', err);
+        this.showMessage('No se pudo cargar el perfil: ' + (err.statusText || 'Error desconocido'));
+      }
+    });
+  }
 
   toggleTheme() {
     this.themeService.toggle();

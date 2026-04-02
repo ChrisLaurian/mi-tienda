@@ -35,14 +35,6 @@
         <input type="text" placeholder="Buscar productos..." class="search-input" (input)="handleSearch($event)" />
       </div>
       <div class="header-icons">
-        <button class="icon-btn cart-icon" routerLink="/cart">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L21 2H6Z" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3 6H21" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span *ngIf="(cartCount$ | async) as count" class="badge">{{ count }}</span>
-        </button>
         <button class="icon-btn profile-icon" routerLink="/profile">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -53,7 +45,7 @@
     </div>
     
     <div class="greeting-section">
-      <h1 class="greeting">Buenos Días</h1>
+      <h1 class="greeting">Buenos Días, {{ userName }}</h1>
       <p class="greeting-subtitle">Descubre nuestros productos frescos y deliciosos</p>
     </div>
 
@@ -62,9 +54,6 @@
            *ngFor="let cat of categoryIcons" 
            (click)="selectCategory(cat.id)"
            [class.active]="selectedCategoryId === cat.id">
-        <div class="category-icon" [class.active]="selectedCategoryId === cat.id">
-          <ion-icon [name]="cat.icon"></ion-icon>
-        </div>
         <span class="category-name">{{ cat.name }}</span>
       </div>
     </div>
@@ -89,6 +78,7 @@
             <img [src]="getProductImage(product)" [alt]="product.name" />
             <div class="product-price-tag">${{ getProductPrice(product) }}</div>
           </div>
+          <span class="product-name">{{ product.name }}</span>
         </div>
       </div>
 
@@ -101,26 +91,18 @@
         <ion-icon name="pizza-outline" class="promo-icon"></ion-icon>
       </div>
 
-      <!-- Recommended -->
+      <!-- All Products -->
       <div class="section-header">
-        <h2 class="section-title">Recomendados</h2>
-        <a class="see-all">Ver Todo <ion-icon name="chevron-forward"></ion-icon></a>
+        <h2 class="section-title">Productos</h2>
       </div>
       
-      <div class="recommend-grid">
-        <div class="product-card-recommend" *ngFor="let product of getRecommended()" [routerLink]="['/product', product.id]">
+      <div class="all-products-grid">
+        <div class="product-card-all" *ngFor="let product of products" [routerLink]="['/product', product.id]">
           <div class="product-image-container">
             <img [src]="getProductImage(product)" [alt]="product.name" />
-            <div class="product-badges">
-              <span class="rating-badge">
-                <ion-icon name="star"></ion-icon> 4.5
-              </span>
-            </div>
             <div class="product-price-tag">${{ getProductPrice(product) }}</div>
           </div>
-          <div class="product-info">
-            <span class="product-name">{{ product.name }}</span>
-          </div>
+          <span class="product-name">{{ product.name }}</span>
         </div>
       </div>
     </div>

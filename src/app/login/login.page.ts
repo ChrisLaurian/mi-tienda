@@ -10,6 +10,7 @@ import {
   MenuController,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
 
 @Component({
@@ -28,6 +29,7 @@ import { ThemeService } from '../services/theme.service';
 })
 export class LoginPage implements OnInit {
   private themeService = inject(ThemeService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private alertController = inject(AlertController);
   private menuController = inject(MenuController);
@@ -67,23 +69,29 @@ export class LoginPage implements OnInit {
   }
 
   async onLogin() {
+    console.log('onLogin triggered');
     this.errorMessage = '';
     
     if (!this.username || !this.password) {
+      console.log('Missing credentials');
       this.errorMessage = 'Por favor ingresa usuario y contraseña';
       return;
     }
 
     this.isLoading = true;
+    console.log('Calling authService.login');
 
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    if (this.username.toLowerCase() === 'admin' && this.password.toLowerCase() === 'root') {
-      this.isLoading = false;
-      this.router.navigate(['/store']);
-    } else {
-      this.isLoading = false;
-      this.errorMessage = 'Usuario o contraseña incorrectos';
-    }
+    this.authService.login({ username: this.username, password: this.password }).subscribe({
+      next: () => {
+        console.log('Login success');
+        this.isLoading = false;
+        this.router.navigate(['/store']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Login error details:', err);
+        this.errorMessage = 'Usuario o contraseña incorrectos';
+      }
+    });
   }
 }

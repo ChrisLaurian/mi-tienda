@@ -19,6 +19,25 @@ import {
 import { WoocommerceService } from '../services/woocommerce.service';
 import { CartService } from '../services/cart.service';
 import { ThemeService } from '../services/theme.service';
+import { addIcons } from 'ionicons';
+import {
+  homeOutline,
+  storefrontOutline,
+  personOutline,
+  cartOutline,
+  searchOutline,
+  chevronForward,
+  pizzaOutline,
+  sadOutline,
+  appsOutline,
+  restaurantOutline,
+  beerOutline,
+  cafeOutline,
+  nutritionOutline,
+  iceCreamOutline,
+  fastFoodOutline,
+  fishOutline,
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-store',
@@ -48,12 +67,34 @@ export class StorePage implements OnInit {
   private themeService = inject(ThemeService);
   private menuController = inject(MenuController);
   
+  constructor() {
+    addIcons({
+      homeOutline,
+      storefrontOutline,
+      personOutline,
+      cartOutline,
+      searchOutline,
+      chevronForward,
+      pizzaOutline,
+      sadOutline,
+      appsOutline,
+      restaurantOutline,
+      beerOutline,
+      cafeOutline,
+      nutritionOutline,
+      iceCreamOutline,
+      fastFoodOutline,
+      fishOutline,
+    });
+  }
+  
   products: any[] = [];
   categories: any[] = [];
   isLoading = true;
   searchTerm = '';
   selectedCategoryId: number | null = null;
   cartCount$ = this.cartService.totalQuantity$;
+  userName = localStorage.getItem('user_name') || 'Usuario';
 
   // Categorías con iconos de Ionic
   categoryIcons: { id: number | null; name: string; icon: string }[] = [

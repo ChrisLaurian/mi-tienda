@@ -42,6 +42,7 @@ export class ProductDetailPage implements OnInit {
   selectedByTopic: Record<string, Set<string>> = {};
   quantity = 1;
   isFavorite = false;
+  isAdded = false;
 
   ngOnInit() {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -88,6 +89,8 @@ export class ProductDetailPage implements OnInit {
       .filter(Boolean) as Array<{ label: string; type?: 'checkbox' | 'radio'; options: Array<{ label: string; price?: number }> }>;
     const extra = this.selectedExtraTotal();
     this.cartService.addProduct(this.product, this.quantity, { topics: topicsPayload, extraTotal: extra });
+    this.isAdded = true;
+    setTimeout(() => this.isAdded = false, 2000);
     this.selectedByTopic = {};
     this.topicsToRender.forEach((t) => (this.selectedByTopic[t.key] = new Set<string>()));
   }

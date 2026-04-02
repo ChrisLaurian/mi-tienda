@@ -1,0 +1,57 @@
+<ion-content [fullscreen]="true" class="payment-content">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
+        <span style="font-size: 24px; font-weight: 300; color: var(--color-white);">&lt;</span>
+      </button>
+      <h1 class="page-title">Método de Pago</h1>
+      <div class="header-spacer"></div>
+    </div>
+  </div>
+
+  <div class="payment-card">
+    <h2 class="section-title">Seleccionar Tarjeta</h2>
+    
+    <div class="payment-options">
+      <div class="payment-option selected">
+        <ion-icon name="card-outline"></ion-icon>
+        <div class="card-info">
+          <span class="card-name">Visa **** 1234</span>
+          <span class="card-expiry">Expira: 12/26</span>
+        </div>
+        <ion-icon name="radio-button-on" class="radio-icon"></ion-icon>
+      </div>
+
+      <div class="payment-option">
+        <ion-icon name="card-outline"></ion-icon>
+        <div class="card-info">
+          <span class="card-name">Mastercard **** 5678</span>
+          <span class="card-expiry">Expira: 08/28</span>
+        </div>
+        <ion-icon name="radio-button-off" class="radio-icon"></ion-icon>
+      </div>
+    </div>
+
+    <button class="add-card-btn">+ Añadir Nueva Tarjeta</button>
+
+    <div class="order-summary">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span>$45.00</span>
+      </div>
+      <div class="summary-row">
+        <span>Envío</span>
+        <span>$5.00</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>$50.00</span>
+      </div>
+    </div>
+
+    <ion-button expand="block" class="pay-btn" (click)="onPay()">
+      PAGAR AHORA
+    </ion-button>
+  </div>
+</ion-content>

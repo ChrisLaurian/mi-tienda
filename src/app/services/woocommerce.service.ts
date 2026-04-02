@@ -92,12 +92,11 @@ export class WoocommerceService {
     const { key, secret } = this.getSiteKeys(site);
     let fullUrl = '';
     const isLocalhost = typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost';
-    // Si estamos en localhost (cualquier puerto), forzamos proxy para evitar CORS
-    if (isLocalhost) {
-      fullUrl = `/proxy-wc/${site.id}${path}`;
-    } else if (!environment.production) {
-      // Desarrollo sin localhost (por si se usa LAN/IP), también intentamos proxy
-      fullUrl = `/proxy-wc/${site.id}${path}`;
+    
+    // Si estamos en desarrollo, usamos el proxy configurado en src/proxy.conf.json
+    if (!environment.production) {
+      // El proxy mapea /wp-json directamente a la URL base + /wp-json
+      fullUrl = `${path}`;
     } else {
       // Producción: llamada directa al dominio
       const restBase = site.usaIndexPhp ? '/index.php/wp-json' : '/wp-json';

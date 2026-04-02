@@ -2,8 +2,8 @@
   <!-- Yellow Header Section -->
   <div class="header-section">
     <div class="header-top">
-      <button class="back-btn" (click)="goBack()">
-        <ion-icon name="chevron-back"></ion-icon>
+      <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
+        <span style="font-size: 24px; font-weight: 300; color: var(--color-white);">&lt;</span>
       </button>
       <h1 class="page-title">Mi Perfil</h1>
       <div class="header-spacer"></div>
@@ -20,6 +20,13 @@
           </svg>
         </button>
       </div>
+    </div>
+    
+    <!-- Carrito en Perfil -->
+    <div class="cart-link" routerLink="/cart">
+      <ion-icon name="cart-outline"></ion-icon>
+      <span>Ver Carrito</span>
+      <ion-badge *ngIf="(cartCount$ | async) as count" color="primary">{{ count }}</ion-badge>
     </div>
   </div>
 

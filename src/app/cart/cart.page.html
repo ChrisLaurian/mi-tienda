@@ -2,127 +2,37 @@
   <!-- Yellow Header Section -->
   <div class="header-section">
     <div class="header-top">
-      <button class="back-btn" (click)="goBack()">
-        <ion-icon name="chevron-back"></ion-icon>
+      <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
+        <span style="font-size: 24px; font-weight: 300; color: var(--color-white);">&lt;</span>
       </button>
-      <h1 class="page-title">Mis Pedidos</h1>
+      <h1 class="page-title">Mi Carrito</h1>
       <div class="header-spacer"></div>
     </div>
   </div>
 
-  <!-- Tab Buttons -->
-  <div class="tabs-section">
-    <div class="tab-buttons">
-      <button 
-        class="tab-btn" 
-        [class.active]="selectedTab === 'active'"
-        (click)="selectTab('active')">
-        Activos
-      </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="selectedTab === 'completed'"
-        (click)="selectTab('completed')">
-        Completados
-      </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="selectedTab === 'cancelled'"
-        (click)="selectTab('cancelled')">
-        Cancelados
-      </button>
+  <!-- Cart List (Products to Pay) -->
+  <div class="cart-list" style="padding: 20px;">
+    <div *ngIf="(items$ | async)?.length === 0" class="empty-state" style="text-align: center; padding: 40px; color: #999;">
+      <ion-icon name="bag-outline" style="font-size: 64px;"></ion-icon>
+      <p>Tu carrito está vacío</p>
+    </div>
+    
+    <div class="cart-item" *ngFor="let item of (items$ | async)" style="display: flex; align-items: center; background: var(--color-white); padding: 15px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+      <div class="item-image" style="width: 60px; height: 60px; border-radius: 15px; overflow: hidden; margin-right: 15px;">
+        <img [src]="item.imageUrl" [alt]="item.name" style="width: 100%; height: 100%; object-fit: cover;" />
+      </div>
+      <div class="item-info" style="flex: 1;">
+        <h3 class="item-name" style="margin: 0; font-size: 16px; color: var(--color-dark-brown);">{{ item.name }}</h3>
+        <p class="item-price" style="margin: 5px 0 0; color: var(--color-orange); font-weight: 700;">${{ item.price.toFixed(2) }}</p>
+      </div>
+      <div class="item-quantity" style="color: var(--color-dark-brown);">x{{ item.quantity }}</div>
     </div>
   </div>
 
-  <!-- Orders List -->
-  <div class="orders-list">
-    <!-- Active Orders -->
-    <ng-container *ngIf="selectedTab === 'active'">
-      <div *ngIf="activeOrders.length === 0" class="empty-state">
-        <ion-icon name="bag-outline"></ion-icon>
-        <p>No hay pedidos activos</p>
-      </div>
-      
-      <div class="order-card" *ngFor="let order of activeOrders">
-        <div class="order-image">
-          <img [src]="order.image" [alt]="order.name" />
-        </div>
-        <div class="order-info">
-          <h3 class="order-name">{{ order.name }}</h3>
-          <p class="order-date">{{ order.date }}</p>
-          <div class="order-status">
-            <ion-icon name="time-outline"></ion-icon>
-            <span>{{ order.status }}</span>
-          </div>
-          <div class="order-buttons">
-            <button class="btn-review" (click)="leaveReview(order)">Ver Detalles</button>
-            <button class="btn-order-again" (click)="orderAgain(order)">Seguir</button>
-          </div>
-        </div>
-        <div class="order-price-section">
-          <span class="order-price">${{ order.price.toFixed(2) }}</span>
-          <span class="order-items">{{ order.items }} items</span>
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- Completed Orders -->
-    <ng-container *ngIf="selectedTab === 'completed'">
-      <div *ngIf="completedOrders.length === 0" class="empty-state">
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
-        <p>No hay pedidos completados</p>
-      </div>
-      
-      <div class="order-card" *ngFor="let order of completedOrders">
-        <div class="order-image">
-          <img [src]="order.image" [alt]="order.name" />
-        </div>
-        <div class="order-info">
-          <h3 class="order-name">{{ order.name }}</h3>
-          <p class="order-date">{{ order.date }}</p>
-          <div class="order-status completed">
-            <ion-icon name="checkmark-circle"></ion-icon>
-            <span>{{ order.status }}</span>
-          </div>
-          <div class="order-buttons">
-            <button class="btn-review" (click)="leaveReview(order)">Dejar Reseña</button>
-            <button class="btn-order-again" (click)="orderAgain(order)">Pedir de Nuevo</button>
-          </div>
-        </div>
-        <div class="order-price-section">
-          <span class="order-price">${{ order.price.toFixed(2) }}</span>
-          <span class="order-items">{{ order.items }} items</span>
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- Cancelled Orders -->
-    <ng-container *ngIf="selectedTab === 'cancelled'">
-      <div *ngIf="cancelledOrders.length === 0" class="empty-state">
-        <ion-icon name="close-circle-outline"></ion-icon>
-        <p>No hay pedidos cancelados</p>
-      </div>
-      
-      <div class="order-card cancelled" *ngFor="let order of cancelledOrders">
-        <div class="order-image">
-          <img [src]="order.image" [alt]="order.name" />
-        </div>
-        <div class="order-info">
-          <h3 class="order-name">{{ order.name }}</h3>
-          <p class="order-date">{{ order.date }}</p>
-          <div class="order-status cancelled">
-            <ion-icon name="close-circle"></ion-icon>
-            <span>{{ order.status }}</span>
-          </div>
-          <div class="order-buttons">
-            <button class="btn-order-again" (click)="orderAgain(order)">Pedir de Nuevo</button>
-          </div>
-        </div>
-        <div class="order-price-section">
-          <span class="order-price">${{ order.price.toFixed(2) }}</span>
-          <span class="order-items">{{ order.items }} items</span>
-        </div>
-      </div>
-    </ng-container>
+  <!-- Checkout Button -->
+  <div class="checkout-section" style="padding: 20px;">
+    <ion-button expand="block" class="checkout-btn" routerLink="/payment" style="--background: var(--color-orange); --border-radius: 25px; height: 55px; font-weight: bold;">
+      Ir a Pagar
+    </ion-button>
   </div>
 </ion-content>
