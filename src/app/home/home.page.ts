@@ -7,8 +7,11 @@ import {
   IonFooter,
   IonToolbar,
   IonTitle,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { ThemeService } from '../services/theme.service';
+import { addIcons } from 'ionicons';
+import { locationOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-home',
@@ -23,11 +26,16 @@ import { ThemeService } from '../services/theme.service';
     IonFooter,
     IonToolbar,
     IonTitle,
+    IonIcon,
   ],
 })
 export class HomePage {
   private themeService = inject(ThemeService);
   private router = inject(Router);
+
+  constructor() {
+    addIcons({ locationOutline });
+  }
 
   toggleTheme() {
     this.themeService.toggle();
@@ -35,5 +43,9 @@ export class HomePage {
 
   onSignUp() {
     this.router.navigate(['/register']);
+  }
+
+  goToStoreSelector() {
+    this.router.navigate(['/store-selector']);
   }
 }

@@ -72,6 +72,21 @@
   letter-spacing: 1px;
 }
 
+.store-selector-btn {
+  --background: rgba(255, 255, 255, 0.2);
+  --background-hover: rgba(255, 255, 255, 0.3);
+  --background-activated: rgba(255, 255, 255, 0.25);
+  --color: #FFFFFF;
+  --border-radius: 30px;
+  --box-shadow: none;
+  --border-width: 1px;
+  --border-color: rgba(255, 255, 255, 0.3);
+  --border-style: solid;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .welcome-footer {
   --background: transparent;
   --border-color: transparent;

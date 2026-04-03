@@ -1,0 +1,52 @@
+<ion-content class="store-selector-content">
+  <div class="selector-header">
+    <button class="back-btn" (click)="goBack()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 18L9 12L15 6" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <h1 class="page-title">Seleccionar Tienda</h1>
+  </div>
+
+  <div class="location-section">
+    <button 
+      class="location-btn"
+      (click)="detectLocation()"
+      [disabled]="isLoadingLocation"
+    >
+      <ion-icon [name]="isLoadingLocation ? 'sync' : 'navigate-outline'" [class.spinning]="isLoadingLocation"></ion-icon>
+      <span>{{ isLoadingLocation ? 'Buscando...' : 'Usar mi ubicación' }}</span>
+    </button>
+  </div>
+
+  <div class="stores-list">
+    <h2 class="section-title">Tiendas disponibles</h2>
+    
+    <ion-card 
+      *ngFor="let store of stores" 
+      class="store-card"
+      [class.active]="activeStoreId === store.id"
+      [class.nearest]="nearestStoreId === store.id"
+      (click)="selectStore(store.id)"
+    >
+      <ion-card-header>
+        <div class="store-icon">
+          <ion-icon name="storefront-outline"></ion-icon>
+        </div>
+        <ion-card-title>{{ store.name }}</ion-card-title>
+        <ion-card-subtitle>{{ store.address }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="store-actions">
+          <span class="distance-info" *ngIf="userLocation">
+            A {{ getDistanceToStore(store) }} km
+          </span>
+          <div class="active-badge" *ngIf="activeStoreId === store.id">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            Activa
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

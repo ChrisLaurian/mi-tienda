@@ -72,6 +72,17 @@ export class WoocommerceService {
   private getSiteKeys(site: { id: string; url: string }) {
     const mainUrl = environment.woocommerce.url;
     const defaultId = (environment as any)?.woocommerceDefaultSiteId || 'main';
+    
+    // Check if credentials are in environment config
+    const envSites = (environment as any)?.woocommerceSites || [];
+    const envSite = envSites.find((s: any) => s.id === site.id);
+    if (envSite?.consumerKey && envSite?.consumerSecret) {
+      return {
+        key: envSite.consumerKey,
+        secret: envSite.consumerSecret,
+      };
+    }
+    
     if (site.id === defaultId || site.url === mainUrl) {
       return {
         key: environment.woocommerce.consumerKey,
@@ -92,16 +103,9 @@ export class WoocommerceService {
     const { key, secret } = this.getSiteKeys(site);
     let fullUrl = '';
     
-    // Si estamos en desarrollo, usamos el proxy
-    if (!environment.production) {
-      // El proxy reescribe /proxy-wc/main -> (vacío) -> https://appprot.whapruebas.com
-      // Resultado: /proxy-wc/main/wp-json/wc/v3/products -> https://appprot.whapruebas.com/wp-json/wc/v3/products
-      fullUrl = `/proxy-wc/${site.id}/wp-json${path}`;
-    } else {
-      // Producción: llamada directa al dominio
-      const restBase = site.usaIndexPhp ? '/index.php/wp-json' : '/wp-json';
-      fullUrl = `${site.url}${restBase}${path}`;
-    }
+    // Siempre usamos URL directa para evitar problemas de proxy
+    const restBase = site.usaIndexPhp ? '/index.php/wp-json' : '/wp-json';
+    fullUrl = `${site.url}${restBase}${path}`;
 
     console.log('=== buildApiUrl Debug ===');
     console.log('site.id:', site.id);
@@ -144,9 +148,17 @@ export class WoocommerceService {
 
     return this.http.get<any[]>(url, { params, headers }).pipe(
       catchError((err) => {
-        const is401 = err?.status === 401;
+        console.error('=== WooCommerce API Error ===');
+        console.error('Status:', err?.status);
+        console.error('Message:', err?.message);
+        console.error('URL:', url);
+        console.error('================================');
+
+        const isAuthError = err?.status === 401 || err?.status === 403;
         const fallback = this.buildApiUrl('/wc/v3/products', 'query');
-        if (is401) {
+        
+        if (isAuthError || err?.status === 0) {
+          console.log('Trying fallback...');
           let params2 = fallback.params.set('page', page.toString()).set('per_page', perPage.toString());
           if (search?.trim()) params2 = params2.set('search', search.trim());
           if (typeof categoryId === 'number' && Number.isFinite(categoryId)) params2 = params2.set('category', String(categoryId));
