@@ -1,91 +1,133 @@
 <ion-content [fullscreen]="true" class="profile-content">
-  <!-- Yellow Header Section -->
-  <div class="header-section">
-    <div class="header-top">
-      <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
-        <span style="font-size: 24px; font-weight: 300; color: var(--color-white);">&lt;</span>
-      </button>
-      <h1 class="page-title">Mi Perfil</h1>
-      <div class="header-spacer"></div>
+  <!-- Not Logged In State -->
+  <div *ngIf="!isLoggedIn && !isLoading" class="not-logged-in">
+    <div class="not-logged-in-content">
+      <ion-icon name="person-circle-outline"></ion-icon>
+      <h2>No has iniciado sesión</h2>
+      <p>Inicia sesión para ver tu perfil y puntos</p>
+      <ion-button expand="block" class="login-btn" (click)="goToLogin()">
+        Iniciar Sesión
+      </ion-button>
     </div>
-    
-    <!-- Profile Image -->
-    <div class="profile-image-container">
-      <div class="profile-image-wrapper">
-        <img [src]="user.avatar" [alt]="user.name" class="profile-image" />
-        <button class="edit-photo-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 9C13.6569 9 15 7.65685 15 6C15 4.34315 13.6569 3 12 3C10.3431 3 9 4.34315 9 6C9 7.65685 10.3431 9 12 9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando perfil...</p>
+  </div>
+
+  <!-- Profile Content (when logged in) -->
+  <ng-container *ngIf="isLoggedIn && !isLoading">
+    <!-- Yellow Header Section -->
+    <div class="header-section">
+      <div class="header-top">
+        <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
+          <span style="font-size: 24px; font-weight: 300; color: var(--color-white);">&lt;</span>
         </button>
+        <h1 class="page-title">Mi Perfil</h1>
+        <div class="header-spacer"></div>
       </div>
-    </div>
-    
-    <!-- Carrito en Perfil -->
-    <div class="cart-link" routerLink="/cart">
-      <ion-icon name="cart-outline"></ion-icon>
-      <span>Ver Carrito</span>
-      <ion-badge *ngIf="(cartCount$ | async) as count" color="primary">{{ count }}</ion-badge>
-    </div>
-  </div>
-
-  <!-- Form Section -->
-  <div class="form-section">
-    <!-- Points Card -->
-    <div class="points-card">
-      <div class="points-content">
-        <div class="points-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#FFD54F">
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-          </svg>
-        </div>
-        <div class="points-info">
-          <span class="points-label">Puntos</span>
-          <span class="points-value">{{ user.points | number }}</span>
+      
+      <!-- Profile Image -->
+      <div class="profile-image-container">
+        <div class="profile-image-wrapper">
+          <img [src]="user.avatar" [alt]="user.name" class="profile-image" />
+          <button class="edit-photo-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 9C13.6569 9 15 7.65685 15 6C15 4.34315 13.6569 3 12 3C10.34315 3 9 4.34315 9 6C9 7.65685 10.3431 9 12 9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Form Fields -->
-    <div class="form-fields">
-      <div class="form-field">
-        <label class="field-label">Full Name</label>
-        <div class="field-value-box">
-          <span>{{ user.name }}</span>
+    <!-- Form Section -->
+    <div class="form-section">
+      <!-- Points Card -->
+      <div class="points-card">
+        <div class="points-content">
+          <div class="points-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#FFD54F">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+          </div>
+          <div class="points-info">
+            <span class="points-label">Puntos</span>
+            <span class="points-value">{{ user.points | number }}</span>
+          </div>
         </div>
       </div>
 
-      <div class="form-field">
-        <label class="field-label">Date of Birth</label>
-        <div class="field-value-box">
-          <span>{{ user.dateOfBirth || '09 / 10 / 1991' }}</span>
+      <!-- Form Fields -->
+      <div class="form-fields">
+        <div class="form-field">
+          <label class="field-label">Nombre Completo</label>
+          <div class="field-value-box">
+            <span>{{ user.name || 'No disponible' }}</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Fecha de Nacimiento</label>
+          <div class="field-value-box">
+            <span>{{ user.dateOfBirth || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Correo Electrónico</label>
+          <div class="field-value-box">
+            <span>{{ user.email || 'No disponible' }}</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Teléfono</label>
+          <div class="field-value-box">
+            <span>{{ user.phone || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <!-- Address Section -->
+        <div class="form-field">
+          <label class="field-label">Dirección</label>
+          <div class="field-value-box">
+            <span>{{ user.address || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Ciudad</label>
+          <div class="field-value-box">
+            <span>{{ user.city || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Código Postal</label>
+          <div class="field-value-box">
+            <span>{{ user.postcode || 'No especificado' }}</span>
+          </div>
         </div>
       </div>
 
-      <div class="form-field">
-        <label class="field-label">Email</label>
-        <div class="field-value-box">
-          <span>{{ user.email }}</span>
-        </div>
-      </div>
+      <!-- Update Profile Button -->
+      <ion-button expand="block" class="update-profile-btn" (click)="editProfile()">
+        Editar Perfil
+      </ion-button>
 
-      <div class="form-field">
-        <label class="field-label">Phone Number</label>
-        <div class="field-value-box">
-          <span>{{ user.phone || '+123 567 89000' }}</span>
-        </div>
-      </div>
+      <!-- Change Password Button -->
+      <ion-button expand="block" class="password-btn" (click)="changePassword()">
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        Cambiar Contraseña
+      </ion-button>
+
+      <!-- Logout Button -->
+      <ion-button expand="block" class="logout-btn" fill="outline" (click)="logout()">
+        Cerrar Sesión
+      </ion-button>
     </div>
-
-    <!-- Update Profile Button -->
-    <ion-button expand="block" class="update-profile-btn" (click)="editProfile()">
-      Editar Perfil
-    </ion-button>
-
-    <!-- Logout Button -->
-    <ion-button expand="block" class="logout-btn" fill="outline" routerLink="/login">
-      Cerrar Sesión
-    </ion-button>
-  </div>
+  </ng-container>
 </ion-content>

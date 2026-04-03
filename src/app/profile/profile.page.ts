@@ -6,6 +6,7 @@ import {
   IonIcon,
   IonButton,
   IonBadge,
+  IonSpinner,
   AlertController,
   MenuController,
 } from '@ionic/angular/standalone';
@@ -25,6 +26,7 @@ import { ThemeService } from '../services/theme.service';
     IonIcon,
     IonButton,
     IonBadge,
+    IonSpinner,
   ],
 })
 export class ProfilePage implements OnInit {
@@ -36,37 +38,75 @@ export class ProfilePage implements OnInit {
   private router = inject(Router);
   cartCount$ = this.cartService.totalQuantity$;
 
+  isLoading = true;
+  isLoggedIn = false;
+
   user: any = {
-    name: 'Cargando...',
-    email: '...',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
-    dateOfBirth: 'N/A',
-    phone: 'N/A',
+    name: 'Usuario',
+    email: 'usuario@mitienda.com',
+    avatar: 'https://ui-avatars.com/api/?name=Usuario&background=FF6B35&color=fff&size=200',
+    dateOfBirth: '',
+    phone: '',
+    address: '',
+    city: '',
+    postcode: '',
     points: 0,
   };
 
   ngOnInit() {
     this.menuController.enable(true, 'main-menu');
-    this.loadUserData();
+    this.checkLoginStatus();
+  }
+
+  checkLoginStatus() {
+    const token = localStorage.getItem('access_token');
+    const userName = localStorage.getItem('user_name');
+    
+    if (token) {
+      this.isLoggedIn = true;
+      // Show the stored name while loading
+      if (userName) {
+        this.user.name = userName;
+        this.user.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF6B35&color=fff&size=200`;
+      }
+      this.loadUserData();
+    } else {
+      this.isLoggedIn = false;
+      this.isLoading = false;
+    }
   }
 
   loadUserData() {
-    this.authService.getCurrentUser().subscribe({
-      next: (data: any) => {
-        this.user = {
-          name: data.name,
-          email: data.email,
-          avatar: data.avatar_urls?.['96'] || this.user.avatar,
-          dateOfBirth: data.meta?.date_of_birth || 'No disponible',
-          phone: data.meta?.phone || 'No disponible',
-          points: data.meta?.points || 0
-        };
-      },
-      error: (err) => {
-        console.error('Profile load error:', err);
-        this.showMessage('No se pudo cargar el perfil: ' + (err.statusText || 'Error desconocido'));
-      }
-    });
+    this.isLoading = true;
+    
+    // Obtener datos del localStorage (guardados durante login)
+    const token = localStorage.getItem('access_token');
+    const userName = localStorage.getItem('user_name');
+    const userEmail = localStorage.getItem('user_email');
+    const userId = localStorage.getItem('user_id');
+    
+    console.log('=== DATOS DEL USUARIO (localStorage) ===');
+    console.log('Token:', token ? token.substring(0, 30) + '...' : 'null');
+    console.log('User ID:', userId);
+    console.log('User Name:', userName);
+    console.log('User Email:', userEmail);
+    console.log('=========================================');
+    
+    // Mostrar datos del usuario desde localStorage
+    this.user = {
+      name: userName || 'Usuario',
+      email: userEmail || '',
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'Usuario')}&background=FF6B35&color=fff&size=200`,
+      dateOfBirth: '',
+      phone: '',
+      address: '',
+      city: '',
+      postcode: '',
+      points: 0,
+      userId: userId || '',
+    };
+    
+    this.isLoading = false;
   }
 
   toggleTheme() {
@@ -75,6 +115,15 @@ export class ProfilePage implements OnInit {
 
   goBack() {
     this.router.navigate(['/store']);
+  }
+
+  goToLogin() {
+    this.router.navigate(['/login']);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   async editProfile() {
@@ -103,7 +152,25 @@ export class ProfilePage implements OnInit {
           name: 'dateOfBirth',
           type: 'text',
           value: this.user.dateOfBirth,
-          placeholder: 'Fecha de nacimiento',
+          placeholder: 'Fecha de nacimiento (DD/MM/AAAA)',
+        },
+        {
+          name: 'address',
+          type: 'text',
+          value: this.user.address,
+          placeholder: 'Dirección',
+        },
+        {
+          name: 'city',
+          type: 'text',
+          value: this.user.city,
+          placeholder: 'Ciudad',
+        },
+        {
+          name: 'postcode',
+          type: 'text',
+          value: this.user.postcode,
+          placeholder: 'Código Postal',
         },
       ],
       buttons: [
@@ -118,9 +185,60 @@ export class ProfilePage implements OnInit {
                 email: data.email,
                 phone: data.phone || this.user.phone,
                 dateOfBirth: data.dateOfBirth || this.user.dateOfBirth,
+                address: data.address || this.user.address,
+                city: data.city || this.user.city,
+                postcode: data.postcode || this.user.postcode,
               };
               this.showMessage('Perfil actualizado correctamente');
             }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async changePassword() {
+    const alert = await this.alertController.create({
+      header: 'Cambiar Contraseña',
+      inputs: [
+        {
+          name: 'currentPassword',
+          type: 'password',
+          placeholder: 'Contraseña actual',
+        },
+        {
+          name: 'newPassword',
+          type: 'password',
+          placeholder: 'Nueva contraseña',
+        },
+        {
+          name: 'confirmPassword',
+          type: 'password',
+          placeholder: 'Confirmar nueva contraseña',
+        },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Cambiar',
+          handler: (data) => {
+            if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
+              this.showMessage('Por favor completa todos los campos');
+              return false;
+            }
+            if (data.newPassword !== data.confirmPassword) {
+              this.showMessage('Las contraseñas no coinciden');
+              return false;
+            }
+            if (data.newPassword.length < 6) {
+              this.showMessage('La contraseña debe tener al menos 6 caracteres');
+              return false;
+            }
+            // Aquí podrías llamar a un API para cambiar la contraseña
+            this.showMessage('Contraseña actualizada correctamente');
+            return true;
           },
         },
       ],

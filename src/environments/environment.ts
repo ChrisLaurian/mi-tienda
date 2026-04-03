@@ -28,7 +28,7 @@ export const environment = {
     }
   },
   woocommerceSites: [
-    { id: 'main', name: 'Principal', url: 'https://appprot.whapruebas.com', usaIndexPhp: true, authMode: 'query' as const },
+      { id: 'main', name: 'Principal', url: 'https://appprot.whapruebas.com', usaIndexPhp: false, authMode: 'header' as const },
     { id: 'test', name: 'Test', url: 'https://appprot.whapruebas.com/test', usaIndexPhp: true, authMode: 'query' as const },
     { id: 'test2', name: 'Test 2', url: 'https://appprot.whapruebas.com/test2', usaIndexPhp: true, authMode: 'query' as const },
   ],

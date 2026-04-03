@@ -4,25 +4,25 @@
     "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
-      "^/proxy-wc/main": "/index.php"
+      "^/proxy-wc/main": ""
     },
     "logLevel": "debug"
   },
   "/proxy-wc/test": {
-    "target": "https://appprot.whapruebas.com",
+    "target": "https://appprot.whapruebas.com/test",
     "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
-      "^/proxy-wc/test": "/test/index.php"
+      "^/proxy-wc/test": ""
     },
     "logLevel": "debug"
   },
   "/proxy-wc/test2": {
-    "target": "https://appprot.whapruebas.com",
+    "target": "https://appprot.whapruebas.com/test2",
     "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
-      "^/proxy-wc/test2": "/test2/index.php"
+      "^/proxy-wc/test2": ""
     },
     "logLevel": "debug"
   }

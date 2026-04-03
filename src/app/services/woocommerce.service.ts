@@ -91,17 +91,25 @@ export class WoocommerceService {
     const site = this.getActiveSite();
     const { key, secret } = this.getSiteKeys(site);
     let fullUrl = '';
-    const isLocalhost = typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost';
     
-    // Si estamos en desarrollo, usamos el proxy configurado en src/proxy.conf.json
+    // Si estamos en desarrollo, usamos el proxy
     if (!environment.production) {
-      // El proxy mapea /wp-json directamente a la URL base + /wp-json
-      fullUrl = `${path}`;
+      // El proxy reescribe /proxy-wc/main -> (vacío) -> https://appprot.whapruebas.com
+      // Resultado: /proxy-wc/main/wp-json/wc/v3/products -> https://appprot.whapruebas.com/wp-json/wc/v3/products
+      fullUrl = `/proxy-wc/${site.id}/wp-json${path}`;
     } else {
       // Producción: llamada directa al dominio
       const restBase = site.usaIndexPhp ? '/index.php/wp-json' : '/wp-json';
       fullUrl = `${site.url}${restBase}${path}`;
     }
+
+    console.log('=== buildApiUrl Debug ===');
+    console.log('site.id:', site.id);
+    console.log('site.url:', site.url);
+    console.log('path:', path);
+    console.log('fullUrl:', fullUrl);
+    console.log('key:', key ? key.substring(0, 10) + '...' : 'EMPTY');
+    console.log('=========================');
 
     let params = new HttpParams();
     let headers = new HttpHeaders();
@@ -127,6 +135,12 @@ export class WoocommerceService {
     if (typeof categoryId === 'number' && Number.isFinite(categoryId)) {
       params = params.set('category', String(categoryId));
     }
+
+    // Debug: mostrar URL completa
+    const fullDebugUrl = url + '?' + params.toString();
+    console.log('=== WooCommerce Products URL ===');
+    console.log(fullDebugUrl);
+    console.log('================================');
 
     return this.http.get<any[]>(url, { params, headers }).pipe(
       catchError((err) => {
