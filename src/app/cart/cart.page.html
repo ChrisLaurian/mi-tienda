@@ -2,37 +2,71 @@
   <!-- Yellow Header Section -->
   <div class="header-section">
     <div class="header-top">
-      <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
-        <span style="font-size: 24px; font-weight: 300; color: var(--color-white);">&lt;</span>
+      <button class="back-btn" (click)="goBack()">
+        <span>&lt;</span>
       </button>
       <h1 class="page-title">Mi Carrito</h1>
-      <div class="header-spacer"></div>
+      <button class="clear-btn" *ngIf="(items$ | async)?.length" (click)="clearCart()">
+        Vaciar
+      </button>
+      <div class="header-spacer" *ngIf="!(items$ | async)?.length"></div>
     </div>
   </div>
 
-  <!-- Cart List (Products to Pay) -->
-  <div class="cart-list" style="padding: 20px;">
-    <div *ngIf="(items$ | async)?.length === 0" class="empty-state" style="text-align: center; padding: 40px; color: #999;">
-      <ion-icon name="bag-outline" style="font-size: 64px;"></ion-icon>
+  <!-- Cart List -->
+  <div class="cart-list">
+    <div *ngIf="(items$ | async)?.length === 0" class="empty-state">
+      <ion-icon name="bag-outline"></ion-icon>
       <p>Tu carrito está vacío</p>
+      <ion-button fill="outline" routerLink="/store" class="continue-btn">
+        Continuar comprando
+      </ion-button>
     </div>
     
-    <div class="cart-item" *ngFor="let item of (items$ | async)" style="display: flex; align-items: center; background: var(--color-white); padding: 15px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-      <div class="item-image" style="width: 60px; height: 60px; border-radius: 15px; overflow: hidden; margin-right: 15px;">
-        <img [src]="item.imageUrl" [alt]="item.name" style="width: 100%; height: 100%; object-fit: cover;" />
+    <div class="cart-item" *ngFor="let item of (items$ | async)">
+      <div class="item-image">
+        <img [src]="item.imageUrl || 'https://via.placeholder.com/80'" [alt]="item.name" />
       </div>
-      <div class="item-info" style="flex: 1;">
-        <h3 class="item-name" style="margin: 0; font-size: 16px; color: var(--color-dark-brown);">{{ item.name }}</h3>
-        <p class="item-price" style="margin: 5px 0 0; color: var(--color-orange); font-weight: 700;">${{ item.price.toFixed(2) }}</p>
+      <div class="item-details">
+        <h3 class="item-name">{{ item.name }}</h3>
+        <p class="item-price">S/ {{ item.price.toFixed(2) }}</p>
+        <div class="item-extras" *ngIf="item.topics?.length">
+          <span *ngFor="let topic of item.topics">
+            {{ topic.label }}: {{ topic.options[0]?.label }}
+          </span>
+        </div>
       </div>
-      <div class="item-quantity" style="color: var(--color-dark-brown);">x{{ item.quantity }}</div>
+      <div class="item-actions">
+        <div class="quantity-controls">
+          <button class="qty-btn minus" (click)="decreaseQuantity(item)">
+            <ion-icon name="remove-outline"></ion-icon>
+          </button>
+          <span class="qty-value">{{ item.quantity }}</span>
+          <button class="qty-btn plus" (click)="increaseQuantity(item)">
+            <ion-icon name="add-outline"></ion-icon>
+          </button>
+        </div>
+        <div class="item-total">S/ {{ getItemTotal(item).toFixed(2) }}</div>
+        <button class="delete-btn" (click)="removeItem(item)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Checkout Button -->
-  <div class="checkout-section" style="padding: 20px;">
-    <ion-button expand="block" class="checkout-btn" routerLink="/payment" style="--background: var(--color-orange); --border-radius: 25px; height: 55px; font-weight: bold;">
+  <!-- Summary & Checkout -->
+  <div class="checkout-section" *ngIf="(items$ | async)?.length">
+    <div class="summary-card">
+      <div class="summary-row total">
+        <span>Total</span>
+        <span class="total-amount">S/ {{ total$ | async | number:'1.2-2' }}</span>
+      </div>
+    </div>
+    <ion-button expand="block" class="checkout-btn" (click)="goToCheckout()">
       Ir a Pagar
+    </ion-button>
+    <ion-button expand="block" fill="outline" class="continue-btn" routerLink="/store">
+      Continuar comprando
     </ion-button>
   </div>
 </ion-content>

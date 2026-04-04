@@ -5,12 +5,11 @@ import {
   IonContent,
   IonIcon,
   IonButton,
-  IonBadge,
   AlertController,
 } from '@ionic/angular/standalone';
-import { CartService } from '../services/cart.service';
+import { CartService, CartItem } from '../services/cart.service';
 import { addIcons } from 'ionicons';
-import { cartOutline, bagOutline } from 'ionicons/icons';
+import { cartOutline, bagOutline, addOutline, removeOutline, trashOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-cart',
@@ -23,22 +22,85 @@ import { cartOutline, bagOutline } from 'ionicons/icons';
     IonContent,
     IonIcon,
     IonButton,
-    IonBadge,
   ],
 })
 export class CartPage implements OnInit {
   private router = inject(Router);
+  private alertController = inject(AlertController);
   private cartService = inject(CartService);
   
   items$ = this.cartService.items$;
+  total$ = this.cartService.totalPrice$;
 
   constructor() {
-    addIcons({ cartOutline, bagOutline });
+    addIcons({ cartOutline, bagOutline, addOutline, removeOutline, trashOutline });
   }
 
   ngOnInit() {}
 
   goBack() {
     this.router.navigate(['/store']);
+  }
+
+  increaseQuantity(item: CartItem) {
+    this.cartService.setQuantity(item.productId, item.quantity + 1);
+  }
+
+  decreaseQuantity(item: CartItem) {
+    if (item.quantity > 1) {
+      this.cartService.setQuantity(item.productId, item.quantity - 1);
+    } else {
+      this.removeItem(item);
+    }
+  }
+
+  async removeItem(item: CartItem) {
+    const alert = await this.alertController.create({
+      header: 'Eliminar producto',
+      message: `¿Eliminar "${item.name}" del carrito?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => {
+            this.cartService.remove(item.productId);
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  async clearCart() {
+    const alert = await this.alertController.create({
+      header: 'Vaciar carrito',
+      message: '¿Eliminar todos los productos del carrito?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Vaciar',
+          role: 'destructive',
+          handler: () => {
+            this.cartService.clear();
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  getItemTotal(item: CartItem): number {
+    return item.price * item.quantity;
+  }
+
+  goToCheckout() {
+    this.router.navigate(['/payment']);
   }
 }

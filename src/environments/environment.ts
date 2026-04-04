@@ -13,16 +13,17 @@ export const environment = {
     pluginApi: {
       namespace: 'flexi-options/v1',
       categoryTopicsPath: '/{namespace}/topics/{id}'
-    },
+    }
+    ,
     pluginTopics: {
-      fruits: {
-        label: 'Frutas',
-        categoryNames: ['producto', 'frutas'],
+      color: {
+        label: 'Color',
+        categoryNames: ['ropa', 'camisa', 'tee'],
         type: 'checkbox',
         options: [
-          { id: 'platano', label: 'Plátano' },
-          { id: 'manzana', label: 'Manzana' },
-          { id: 'melon', label: 'Melón' }
+          { id: 'rojo', label: 'Rojo' },
+          { id: 'azul', label: 'Azul' },
+          { id: 'negro', label: 'Negro' }
         ]
       }
     }
@@ -35,7 +36,14 @@ export const environment = {
       usaIndexPhp: false, 
       authMode: 'header' as const,
       consumerKey: 'ck_a42e54dee022e07234e930cfdd3c6cf883a24a48',
-      consumerSecret: 'cs_500dc3cff7fb6f0dc3703ae555c5bf7975417b8f'
+      consumerSecret: 'cs_500dc3cff7fb6f0dc3703ae555c5bf7975417b8f',
+      lat: 19.4326,
+      lng: -99.1332,
+      postalCodeRanges: [
+        { start: '15000', end: '15099' },
+        { start: '15100', end: '15199' },
+        { start: '14000', end: '14099' },
+      ]
     },
     { 
       id: 'test', 
@@ -44,7 +52,14 @@ export const environment = {
       usaIndexPhp: true, 
       authMode: 'query' as const,
       consumerKey: 'ck_5581d1b5b5324263a1b0be4848232ca4dc75d3cb',
-      consumerSecret: 'cs_5da98a776949b68010dd65319c77ee1b78a29078'
+      consumerSecret: 'cs_5da98a776949b68010dd65319c77ee1b78a29078',
+      lat: 19.4826,
+      lng: -99.1532,
+      postalCodeRanges: [
+        { start: '15300', end: '15399' },
+        { start: '15400', end: '15499' },
+        { start: '15500', end: '15599' },
+      ]
     },
     { 
       id: 'test2', 
@@ -53,7 +68,14 @@ export const environment = {
       usaIndexPhp: true, 
       authMode: 'query' as const,
       consumerKey: 'ck_1a4a9a7c29f04f0966209ce15b1492b6ecf0cbf0',
-      consumerSecret: 'cs_bf8a45ebbf503d82596e874d567d40b3de28e196'
+      consumerSecret: 'cs_bf8a45ebbf503d82596e874d567d40b3de28e196',
+      lat: 19.3926,
+      lng: -99.1132,
+      postalCodeRanges: [
+        { start: '15500', end: '15599' },
+        { start: '15600', end: '15699' },
+        { start: '15700', end: '15799' },
+      ]
     },
   ],
   woocommerceDefaultSiteId: 'main'

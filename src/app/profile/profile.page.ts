@@ -5,7 +5,6 @@ import {
   IonContent,
   IonIcon,
   IonButton,
-  IonBadge,
   IonSpinner,
   AlertController,
   MenuController,
@@ -25,7 +24,6 @@ import { ThemeService } from '../services/theme.service';
     IonContent,
     IonIcon,
     IonButton,
-    IonBadge,
     IonSpinner,
   ],
 })
@@ -36,6 +34,7 @@ export class ProfilePage implements OnInit {
   private alertController = inject(AlertController);
   private menuController = inject(MenuController);
   private router = inject(Router);
+  
   cartCount$ = this.cartService.totalQuantity$;
 
   isLoading = true;
@@ -64,7 +63,6 @@ export class ProfilePage implements OnInit {
     
     if (token) {
       this.isLoggedIn = true;
-      // Show the stored name while loading
       if (userName) {
         this.user.name = userName;
         this.user.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF6B35&color=fff&size=200`;
@@ -79,20 +77,10 @@ export class ProfilePage implements OnInit {
   loadUserData() {
     this.isLoading = true;
     
-    // Obtener datos del localStorage (guardados durante login)
-    const token = localStorage.getItem('access_token');
     const userName = localStorage.getItem('user_name');
     const userEmail = localStorage.getItem('user_email');
     const userId = localStorage.getItem('user_id');
     
-    console.log('=== DATOS DEL USUARIO (localStorage) ===');
-    console.log('Token:', token ? token.substring(0, 30) + '...' : 'null');
-    console.log('User ID:', userId);
-    console.log('User Name:', userName);
-    console.log('User Email:', userEmail);
-    console.log('=========================================');
-    
-    // Mostrar datos del usuario desde localStorage
     this.user = {
       name: userName || 'Usuario',
       email: userEmail || '',
@@ -236,7 +224,6 @@ export class ProfilePage implements OnInit {
               this.showMessage('La contraseña debe tener al menos 6 caracteres');
               return false;
             }
-            // Aquí podrías llamar a un API para cambiar la contraseña
             this.showMessage('Contraseña actualizada correctamente');
             return true;
           },

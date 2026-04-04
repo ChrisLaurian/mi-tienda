@@ -32,7 +32,7 @@
 
     <!-- Price and Quantity -->
     <div class="price-quantity-section">
-      <span class="product-price">${{ getBasePriceNumber().toFixed(2) }}</span>
+      <span class="product-price">S/ {{ getBasePriceNumber().toFixed(2) }}</span>
       <div class="quantity-selector">
         <button class="qty-btn minus" (click)="decreaseQuantity()">
           <span style="font-size: 24px; font-weight: 300; color: white;">-</span>
@@ -50,24 +50,73 @@
       <p class="product-description" [innerHTML]="product.short_description || product.description"></p>
     </div>
 
+    <!-- Debug: show product categories when available --> 
+    <div class="categories-section" *ngIf="product">
+      <h3 class="section-title">Categorías</h3>
+      
+      <div *ngIf="!product.categories || product.categories.length === 0">
+        <p>El producto no tiene categorías</p>
+      </div>
+      
+      <!-- Debug info -->
+      <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; font-size: 12px;">
+        <p><strong>Debug info:</strong></p>
+        <p>enrichedCategories: {{ enrichedCategories | json }}</p>
+      </div>
+      
+      <div *ngIf="product.categories && product.categories.length > 0">
+        <div *ngFor="let c of (enrichedCategories?.length ? enrichedCategories : product.categories)" style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px;">
+          <p><strong>Categoría:</strong> {{ c?.name || c?.slug || c?.id }}</p>
+          <p *ngIf="c?.id">ID: {{ c.id }}</p>
+          <p *ngIf="c?.description">Descripción: {{ c.description }}</p>
+          <p *ngIf="c?.slug">Slug: {{ c.slug }}</p>
+          <p *ngIf="c?.count">Conteo: {{ c.count }}</p>
+          
+          <!-- Subcategorías -->
+          <div *ngIf="c?.children && c.children.length > 0" style="margin-left: 20px; margin-top: 10px;">
+            <p><strong>Subcategorías ({{c.children.length}}):</strong></p>
+            <ul>
+              <li *ngFor="let child of c.children">
+                {{ child.name || child.slug }} (ID: {{child.id}})
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="!c?.children || c.children.length === 0" style="margin-left: 20px; margin-top: 10px; color: #888;">
+            <em>Sin subcategorías</em>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Add on ingredients Section -->
     <ng-container *ngIf="topicsToRender.length > 0">
       <div class="toppings-section">
-        <h3 class="section-title">Add on ingredients</h3>
+        <h3 class="section-title">Personaliza tu pedido</h3>
         
-        <div class="topping-group" *ngFor="let topic of topicsToRender">
-          <h4 class="topic-name">{{ topic.label }}</h4>
-          <div class="topping-item" *ngFor="let opt of topic.options">
-            <div class="topping-row">
-              <span class="topping-name">{{ opt.label }}</span>
-              <div class="topping-right">
-                <span class="topping-price">${{ (opt.price || 0).toFixed(2) }}</span>
-                <button 
-                  class="topping-radio"
-                  [class.selected]="selectedByTopic[topic.key]?.has(opt.id)"
-                  (click)="toggleOption(topic.key, opt.id, !selectedByTopic[topic.key]?.has(opt.id))">
-                  <div class="radio-inner"></div>
-                </button>
+        <div class="topic-card" *ngFor="let topic of topicsToRender">
+          <div class="topic-header">
+            <h4 class="topic-name">{{ topic.label }}</h4>
+            <span class="topic-type" *ngIf="topic.type === 'radio'">Selecciona uno</span>
+            <span class="topic-type" *ngIf="topic.type !== 'radio'">Selecciona varios</span>
+            <span class="required-badge" *ngIf="topic.required">Requerido</span>
+          </div>
+          
+          <div class="options-list">
+            <div class="option-item" 
+                 *ngFor="let opt of topic.options"
+                 [class.selected]="selectedByTopic[topic.key]?.has(opt.id)"
+                 (click)="toggleOption(topic.key, opt.id, !selectedByTopic[topic.key]?.has(opt.id))">
+              <div class="option-checkbox">
+                <div class="checkbox-inner" *ngIf="selectedByTopic[topic.key]?.has(opt.id)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="option-info">
+                <span class="option-name">{{ opt.label }}</span>
+                <span class="option-price" *ngIf="opt.price && opt.price > 0">+ S/ {{ opt.price.toFixed(2) }}</span>
+                <span class="option-price free" *ngIf="!opt.price || opt.price === 0">Gratis</span>
               </div>
             </div>
           </div>
@@ -78,9 +127,13 @@
 
     <!-- Add to Cart Button (Fixed at bottom) -->
   <div class="add-to-cart-section" *ngIf="!isLoading && product">
+    <div class="total-display">
+      <span class="total-label">Total:</span>
+      <span class="total-amount">S/ {{ ((getBasePriceNumber() + selectedExtraTotal()) * quantity).toFixed(2) }}</span>
+    </div>
     <button class="add-to-cart-btn" (click)="addToCart()" [class.added]="isAdded">
       <ion-icon name="cart-outline"></ion-icon>
-      {{ isAdded ? '¡Añadido!' : 'Add to Cart' }}
+      {{ isAdded ? '¡Añadido!' : 'Añadir al Carrito' }}
     </button>
   </div>
 </ion-content>

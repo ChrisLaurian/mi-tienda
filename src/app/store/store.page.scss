@@ -12,7 +12,40 @@
 .header-top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.store-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+  
+  .store-icon {
+    font-size: 18px;
+    color: var(--color-orange);
+  }
+  
+  .store-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-dark-brown);
+  }
+  
+  .chevron-icon {
+    font-size: 14px;
+    color: var(--color-dark-brown);
+  }
 }
 
 .search-container {
@@ -22,7 +55,7 @@
   border-radius: 25px;
   padding: 10px 16px;
   flex: 1;
-  margin-right: 12px;
+  margin-left: 12px;
 }
 
 .search-input {
@@ -51,6 +84,31 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  position: relative;
+}
+
+.cart-icon {
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .cart-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--color-orange);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
 }
 
 .greeting {

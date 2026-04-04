@@ -1,6 +1,13 @@
 <ion-content [fullscreen]="true" class="profile-content">
   <!-- Not Logged In State -->
   <div *ngIf="!isLoggedIn && !isLoading" class="not-logged-in">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
+        <span style="font-size: 24px; font-weight: 300; color: var(--color-dark-brown);">&lt;</span>
+      </button>
+      <h1 class="page-title">Mi Perfil</h1>
+      <div class="header-spacer"></div>
+    </div>
     <div class="not-logged-in-content">
       <ion-icon name="person-circle-outline"></ion-icon>
       <h2>No has iniciado sesión</h2>
@@ -122,6 +129,11 @@
       <ion-button expand="block" class="password-btn" (click)="changePassword()">
         <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
         Cambiar Contraseña
+      </ion-button>
+
+      <!-- My Orders Button -->
+      <ion-button expand="block" class="orders-btn" routerLink="/orders">
+        Mis Pedidos
       </ion-button>
 
       <!-- Logout Button -->

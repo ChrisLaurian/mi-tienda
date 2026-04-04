@@ -106,3 +106,27 @@
   margin-bottom: 15px;
   text-align: center;
 }
+
+.store-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff3e0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ffcc80;
+  
+  .store-icon {
+    font-size: 20px;
+  }
+  
+  .store-text {
+    font-size: 14px;
+    color: var(--color-text-main);
+    
+    strong {
+      color: var(--color-orange);
+    }
+  }
+}

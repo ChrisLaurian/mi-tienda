@@ -155,6 +155,17 @@ ion-card-header p {
   color: var(--ion-text-color);
 }
 
+/* Store Selector Popover */
+.store-selector-popover {
+  --width: 280px;
+  --max-width: 90vw;
+  
+  .popover-content {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+}
+
 /**
  * Dark Theme
  */
@@ -278,4 +289,15 @@ ion-card p,
 ion-card-content p,
 ion-card-header p {
   color: var(--ion-text-color);
+}
+
+/* Store Selector Popover */
+.store-selector-popover {
+  --width: 280px;
+  --max-width: 90vw;
+  
+  .popover-content {
+    border-radius: 16px;
+    overflow: hidden;
+  }
 }

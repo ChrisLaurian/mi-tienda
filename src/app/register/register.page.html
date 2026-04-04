@@ -54,6 +54,25 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label class="form-label">Código Postal</label>
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              [(ngModel)]="postalCode" 
+              (ngModelChange)="onPostalCodeChange()" 
+              placeholder="Ej. 06600" 
+              class="native-input"
+              maxlength="5"
+            />
+          </div>
+        </div>
+
+        <div *ngIf="suggestedStore" class="store-suggestion">
+          <span class="store-icon">📍</span>
+          <span class="store-text">Tienda sugerida: <strong>{{ suggestedStore }}</strong></span>
+        </div>
+
         <div *ngIf="errorMessage" class="error-message">
           <ion-text color="danger">{{ errorMessage }}</ion-text>
         </div>

@@ -1,0 +1,35 @@
+<ion-content class="store-popover-content">
+  <div class="popover-header">
+    <span class="popover-title">Seleccionar Tienda</span>
+  </div>
+  
+  <ion-list class="store-list">
+    <ion-item 
+      *ngFor="let store of stores" 
+      (click)="selectStore(store.id)"
+      [class.active]="store.id === activeStoreId"
+      lines="none"
+      class="store-item"
+    >
+      <ion-icon 
+        name="storefront-outline" 
+        slot="start" 
+        class="store-icon"
+      ></ion-icon>
+      <ion-label>{{ store.name }}</ion-label>
+      <ion-icon 
+        *ngIf="store.id === activeStoreId"
+        name="checkmark-circle" 
+        slot="end" 
+        class="check-icon"
+      ></ion-icon>
+    </ion-item>
+  </ion-list>
+  
+  <div class="popover-footer">
+    <button class="change-store-btn" (click)="goToStoreSelector()">
+      <ion-icon name="location-outline" slot="start"></ion-icon>
+      Cambiar con ubicación
+    </button>
+  </div>
+</ion-content>

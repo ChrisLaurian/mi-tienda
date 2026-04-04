@@ -11,27 +11,22 @@ export class TopicsService {
   private http = inject(HttpClient);
 
   private buildBaseUrl(): string {
-    const sites = (environment as any)?.woocommerce?.sites || [];
+    const sites = (environment as any)?.woocommerceSites || [];
     const main = sites.find((s: any) => s?.id === 'main') || { url: environment.woocommerce.url, usaIndexPhp: true };
-    const isLocalhost = typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost';
-    if (!environment.production) {
-      if (isLocalhost) return `/proxy-wc/main`;
-      return `/proxy-wc/main`;
-    }
     const restBase = main.usaIndexPhp ? '/index.php/wp-json' : '/wp-json';
     return `${main.url}${restBase}`;
   }
 
   private buildTopicsUrlForCategory(categoryId: number): string {
-    const ns = (environment as any)?.woocommerce?.pluginApi?.namespace || 'custom-plugin/v1';
-    const pattern = (environment as any)?.woocommerce?.pluginApi?.categoryTopicsPath || '/{namespace}/categories/{id}/topics';
+    const ns = (environment as any)?.woocommerce?.pluginApi?.namespace || 'flexi-options/v1';
+    const pattern = '/{namespace}/topics/{id}';
     const path = pattern.replace('{namespace}', ns).replace('{id}', String(categoryId));
     return `${this.buildBaseUrl()}${path}`;
   }
 
   private buildTopicsUrlForProduct(productId: number): string {
-    const ns = (environment as any)?.woocommerce?.pluginApi?.namespace || 'custom-plugin/v1';
-    const pattern = (environment as any)?.woocommerce?.pluginApi?.productTopicsPath || '/{namespace}/topics/{id}';
+    const ns = (environment as any)?.woocommerce?.pluginApi?.namespace || 'flexi-options/v1';
+    const pattern = '/{namespace}/topics/{id}';
     const path = pattern.replace('{namespace}', ns).replace('{id}', String(productId));
     return `${this.buildBaseUrl()}${path}`;
   }
@@ -59,7 +54,6 @@ export class TopicsService {
             ? requiredRaw.toLowerCase() === 'yes'
             : Boolean(requiredRaw);
 
-          // Admite "options" o "items" con { label|name|titulo|nombre }
           const optionsSrc = Array.isArray(g?.options) ? g.options : (Array.isArray(g?.items) ? g.items : []);
           const options = optionsSrc.map((o: any) => {
             const optLabel = String(o?.label ?? o?.name ?? o?.titulo ?? o?.nombre ?? '').trim();
@@ -84,33 +78,120 @@ export class TopicsService {
     return [];
   }
 
-  private fallbackFromConfig(categoryNames: string[]): TopicGroup[] {
-    // Para cumplir "solo trae los que existen", no inventamos topics si el endpoint no responde
-    return [];
-    }
+  private extractFromAttributes(product: any): TopicGroup[] {
+    if (!product || !Array.isArray(product.attributes)) return [];
+    
+    const groups: TopicGroup[] = [];
+    
+    product.attributes.forEach((attr: any) => {
+      if (!attr?.name || !Array.isArray(attr?.options)) return;
+      
+      const label = attr.name;
+      const key = String(label).trim().toLowerCase().replace(/\s+/g, '_');
+      const isVariation = attr?.variation === true || attr?.visible === false;
+      
+      if (isVariation && !label.toLowerCase().includes('size') && !label.toLowerCase().includes('talla') && !label.toLowerCase().includes('tamano')) {
+        return;
+      }
+      
+      const options = attr.options.map((opt: any, idx: number) => {
+        const optLabel = String(opt?.label ?? opt?.name ?? opt ?? `Option ${idx + 1}`).trim();
+        const optId = String(opt?.slug ?? opt?.label ?? opt ?? optLabel).trim().toLowerCase().replace(/\s+/g, '_');
+        return {
+          id: optId,
+          label: optLabel,
+          price: 0
+        };
+      }).filter((o: TopicOption) => o.label);
+      
+      if (options.length > 0) {
+        groups.push({
+          key,
+          label,
+          type: 'checkbox',
+          options,
+          required: false
+        });
+      }
+    });
+    
+    return groups;
+  }
 
-  getTopicsForCategory(categoryId: number, categoryNames: string[]): Observable<TopicGroup[]> {
+  private extractFromMetaData(product: any): TopicGroup[] {
+    if (!product || !Array.isArray(product.meta_data)) return [];
+    
+    const groups: TopicGroup[] = [];
+    
+    product.meta_data.forEach((meta: any) => {
+      if (!meta?.key || !meta?.value) return;
+      
+      const key = String(meta.key);
+      if (key.startsWith('_')) return;
+      
+      try {
+        let value = meta.value;
+        if (typeof value === 'string') {
+          value = JSON.parse(value);
+        }
+        
+        if (Array.isArray(value)) {
+          const parsed = this.parseGroups(value);
+          if (parsed.length > 0) {
+            groups.push(...parsed);
+          }
+        } else if (typeof value === 'object') {
+          if (value.options || value.items) {
+            const group: TopicGroup = {
+              key: key.toLowerCase().replace(/\s+/g, '_'),
+              label: value.label || key,
+              type: (value.type === 'radio' ? 'radio' : 'checkbox') as 'checkbox' | 'radio',
+              required: value.required || false,
+              options: (value.options || value.items || []).map((o: any) => ({
+                id: String(o.id || o.label || '').toLowerCase().replace(/\s+/g, '_'),
+                label: String(o.label || o.id || ''),
+                price: Number(o.price || 0)
+              }))
+            };
+            groups.push(group);
+          }
+        }
+      } catch {}
+    });
+    
+    return groups;
+  }
+
+  getTopicsForProductWithData(product: any): Observable<TopicGroup[]> {
+    return new Observable(observer => {
+      const groups: TopicGroup[] = [];
+      
+      const fromMeta = this.extractFromMetaData(product);
+      if (fromMeta.length > 0) groups.push(...fromMeta);
+      
+      const fromAttrs = this.extractFromAttributes(product);
+      if (fromAttrs.length > 0) groups.push(...fromAttrs);
+      
+      observer.next(groups);
+      observer.complete();
+    });
+  }
+
+  getTopicsForCategory(categoryId: number): Observable<TopicGroup[]> {
     const url = this.buildTopicsUrlForCategory(categoryId);
     const params = new HttpParams();
     const headers = new HttpHeaders();
     return this.http.get<any>(url, { params, headers }).pipe(
       map((res) => this.parseGroups(res)),
-      catchError(() => of([])),
-      map((groups) => (groups.length > 0 ? groups : this.fallbackFromConfig(categoryNames)))
+      catchError(() => of([]))
     );
   }
 
   getTopicsForCategories(categories: Array<{ id: number; name?: string; slug?: string }>): Observable<TopicGroup[]> {
     const ids = categories.map((c) => Number(c?.id)).filter((n) => Number.isFinite(n));
-    const names = categories.reduce<string[]>((acc, c) => {
-      const n = (c?.name || '').toString().toLowerCase();
-      const s = (c?.slug || '').toString().toLowerCase();
-      if (n) acc.push(n);
-      if (s) acc.push(s);
-      return acc;
-    }, []).filter(Boolean);
-    if (ids.length === 0) return of(this.fallbackFromConfig(names));
-    const calls = ids.map((id) => this.getTopicsForCategory(id, names));
+    if (ids.length === 0) return of([]);
+    
+    const calls = ids.map((id) => this.getTopicsForCategory(id));
     return forkJoin(calls).pipe(
       map((arrays: TopicGroup[][]) => {
         const merged: TopicGroup[] = [];

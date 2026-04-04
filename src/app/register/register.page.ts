@@ -11,6 +11,8 @@ import {
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { StoreLocationService } from '../services/store-location.service';
+import { WoocommerceService } from '../services/woocommerce.service';
 
 @Component({
   selector: 'app-register',
@@ -32,6 +34,8 @@ export class RegisterPage implements OnInit {
   private alertController = inject(AlertController);
   private menuController = inject(MenuController);
   private authService = inject(AuthService);
+  private storeLocationService = inject(StoreLocationService);
+  private woocommerceService = inject(WoocommerceService);
 
   fullName = '';
   password = '';
@@ -39,11 +43,23 @@ export class RegisterPage implements OnInit {
   email = '';
   mobile = '';
   dob = '';
+  postalCode = '';
   isLoading = false;
   errorMessage = '';
+  suggestedStore: string | null = null;
 
   ngOnInit() {
     this.menuController.enable(false, 'main-menu');
+  }
+
+  onPostalCodeChange() {
+    if (this.postalCode && this.postalCode.length >= 4) {
+      const store = this.storeLocationService.getStoreByPostalCode(this.postalCode);
+      if (store) {
+        this.suggestedStore = store.name;
+        this.woocommerceService.setActiveSite(store.id);
+      }
+    }
   }
 
   goBack() {
@@ -53,7 +69,6 @@ export class RegisterPage implements OnInit {
   async onRegister() {
     this.errorMessage = '';
     
-    // Validación
     if (!this.fullName || !this.email || !this.password) {
       this.errorMessage = 'Por favor completa los campos obligatorios.';
       return;
@@ -71,7 +86,6 @@ export class RegisterPage implements OnInit {
 
     this.isLoading = true;
 
-    // Registrar usuario usando HttpClient de Angular
     this.authService.register({
       username: this.email,
       email: this.email,
@@ -79,15 +93,21 @@ export class RegisterPage implements OnInit {
       first_name: this.fullName,
       billing: {
         phone: this.mobile,
+        postcode: this.postalCode,
       },
     }).subscribe({
       next: async (response: any) => {
         console.log('Registration response:', response);
         this.isLoading = false;
         
+        let message = 'Tu cuenta ha sido creada. Ahora puedes iniciar sesión.';
+        if (this.suggestedStore) {
+          message += ` Se te ha asignado la tienda ${this.suggestedStore}.`;
+        }
+        
         const alert = await this.alertController.create({
           header: 'Registro Exitoso',
-          message: 'Tu cuenta ha sido creada. Ahora puedes iniciar sesión.',
+          message: message,
           buttons: [{
             text: 'OK',
             handler: () => {

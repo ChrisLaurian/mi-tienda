@@ -6,12 +6,16 @@ import {
   IonIcon,
   IonSpinner,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { cartOutline } from 'ionicons/icons';
 import { WoocommerceService } from '../services/woocommerce.service';
 import { CartService } from '../services/cart.service';
-import { environment } from '../../environments/environment';
-import { TopicsService, TopicGroup } from '../services/topics.service';
 import { AlertController } from '@ionic/angular';
 import { ThemeService } from '../services/theme.service';
+import { environment } from '../../environments/environment';
+
+interface TopicOption { id: string; label: string; price?: number }
+interface TopicGroup { key: string; label: string; type: 'checkbox' | 'radio'; options: TopicOption[]; required?: boolean }
 
 @Component({
   selector: 'app-product-detail',
@@ -31,18 +35,65 @@ export class ProductDetailPage implements OnInit {
   private router = inject(Router);
   private woocommerceService = inject(WoocommerceService);
   private cartService = inject(CartService);
-  private topicsService = inject(TopicsService);
   private alertCtrl = inject(AlertController);
   private themeService = inject(ThemeService);
 
   isLoading = true;
   product: any | null = null;
+  enrichedCategories: any[] = [];
   cartCount$ = this.cartService.totalQuantity$;
   topicsToRender: TopicGroup[] = [];
   selectedByTopic: Record<string, Set<string>> = {};
   quantity = 1;
   isFavorite = false;
   isAdded = false;
+
+  constructor() {
+    addIcons({ cartOutline });
+  }
+
+  private loadCategoriesInterior(categories: any[]) {
+    console.log('loadCategoriesInterior called');
+    console.log('categories input:', categories);
+    
+    if (!categories || categories.length === 0) {
+      this.enrichedCategories = [];
+      return;
+    }
+    
+    // Primero mostramos las categorías principales directamente
+    this.enrichedCategories = categories.map(c => ({ ...c, children: [] }));
+    console.log('enrichedCategories initial:', this.enrichedCategories);
+    
+    // Usamos el endpoint flexi-categories para obtener las categorías con subcategorías
+    this.woocommerceService.getFlexiCategories().subscribe({
+      next: (flexiCats: any[]) => {
+        console.log('Flexi categories count:', flexiCats ? flexiCats.length : 0);
+        console.log('Flexi categories sample:', flexiCats ? flexiCats[0] : null);
+        
+        if (Array.isArray(flexiCats) && flexiCats.length > 0) {
+          // Buscar subcategorías para cada categoría del producto
+          const enriched = this.enrichedCategories.map(cat => {
+            // Buscar en flexi-categories la categoría y sus hijos
+            const flexiCat = flexiCats.find(fc => Number(fc.id) === Number(cat.id));
+            const children = flexiCat && flexiCat.children ? flexiCat.children : [];
+            console.log('Category', cat.id, 'has', children.length, 'subcategories');
+            return { ...cat, children: children };
+          });
+          
+          this.enrichedCategories = enriched;
+          console.log('Final enriched:', this.enrichedCategories);
+        }
+      },
+      error: (err) => {
+        console.log('getFlexiCategories error:', err);
+      }
+    });
+  }
+
+  private mockCategories(ids: number[]): any[] {
+    return ids.map((id) => ({ id, name: `Categoría ${id}`, slug: `categoria-${id}`, description: 'Datos simulados', count: Math.floor(Math.random() * 100) }));
+  }
 
   ngOnInit() {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -56,10 +107,21 @@ export class ProductDetailPage implements OnInit {
     this.woocommerceService.getProductById(id).subscribe({
       next: (data) => {
         this.product = data;
+        console.log('=== PRODUCTO COMPLETO ===');
+        console.log('data:', data);
+        console.log('categories:', data?.categories);
+        console.log('====================');
+        if (data && data.categories) {
+          console.log('Categories tiene datos:', data.categories);
+        }
         this.loadTopics();
+        this.loadCategoriesInterior(data?.categories || []);
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.log('=== ERROR getProductById ===');
+        console.log('err:', err);
+        console.log('==========================');
         this.product = null;
         this.isLoading = false;
       },
@@ -96,42 +158,154 @@ export class ProductDetailPage implements OnInit {
   }
 
   private loadTopics() {
-    const pid = Number(this.product?.id);
-    if (Number.isFinite(pid) && pid > 0) {
-      this.topicsService.getTopicsForProduct(pid).subscribe({
-        next: (groups) => {
-          if (!groups || groups.length === 0) {
-            const cats = Array.isArray(this.product?.categories) ? this.product.categories : [];
-            this.topicsService.getTopicsForCategories(cats).subscribe({
-              next: (g2) => this.applyTopics(g2),
-              error: () => this.applyTopics([]),
-            });
-            return;
-          }
-          this.applyTopics(groups);
-        },
-        error: () => {
-          const cats = Array.isArray(this.product?.categories) ? this.product.categories : [];
-          this.topicsService.getTopicsForCategories(cats).subscribe({
-            next: (g2) => this.applyTopics(g2),
-            error: () => this.applyTopics([]),
-          });
-        }
-      });
-      return;
+    const groups: TopicGroup[] = [];
+    
+    const fromMeta = this.extractFromMetaData();
+    console.log('fromMeta:', fromMeta);
+    groups.push(...fromMeta);
+    
+    const fromAttrs = this.extractFromAttributes();
+    console.log('fromAttrs:', fromAttrs);
+    groups.push(...fromAttrs);
+    
+    // If no topics found from product data, fall back to environment-defined topics
+    if (groups.length === 0) {
+      const cats = Array.isArray(this.product?.categories) ? this.product.categories : [];
+      const fallback = this.buildFallbackFromEnv(cats);
+      groups.push(...fallback);
     }
-    const cats = Array.isArray(this.product?.categories) ? this.product.categories : [];
-    this.topicsService.getTopicsForCategories(cats).subscribe({
-      next: (groups) => {
-        this.applyTopics(groups);
-      },
-      error: () => this.applyTopics([])
+    
+    console.log('final groups (after fallback):', groups);
+    this.applyTopics(groups);
+  }
+
+  private extractFromMetaData(): TopicGroup[] {
+    if (!this.product || !Array.isArray(this.product.meta_data)) return [];
+    
+    const groups: TopicGroup[] = [];
+    
+    this.product.meta_data.forEach((meta: any) => {
+      if (!meta?.key || !meta?.value) return;
+      
+      const key = String(meta.key);
+      if (key.startsWith('_')) return;
+      
+      try {
+        let value = meta.value;
+        if (typeof value === 'string') {
+          value = JSON.parse(value);
+        }
+        
+        if (Array.isArray(value)) {
+          value.forEach((g: any) => {
+            const label = g?.label ?? g?.name ?? g?.title ?? g?.titulo ?? '';
+            const keyRaw = g?.key ?? g?.id ?? label;
+            const groupKey = String(keyRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
+            const typeRaw = g?.type ?? g?.tipo;
+            const type = (String(typeRaw || '').toLowerCase() === 'radio' ? 'radio' : 'checkbox') as 'checkbox' | 'radio';
+            const requiredRaw = g?.required;
+            const required = typeof requiredRaw === 'string'
+              ? requiredRaw.toLowerCase() === 'yes'
+              : Boolean(requiredRaw);
+            
+            const optionsSrc = Array.isArray(g?.options) ? g.options : (Array.isArray(g?.items) ? g.items : []);
+            const options = optionsSrc.map((o: any) => {
+              const optLabel = String(o?.label ?? o?.name ?? o?.titulo ?? o?.nombre ?? '').trim();
+              const optIdRaw = o?.id ?? o?.value ?? optLabel;
+              const optId = String(optIdRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
+              const priceRaw = o?.precio ?? o?.price ?? 0;
+              const priceNum = Number(priceRaw) || 0;
+              return { id: optId, label: optLabel, price: priceNum };
+            }).filter((o: TopicOption) => o.label);
+            
+            if (groupKey && label && options.length > 0) {
+              groups.push({ key: groupKey, label: String(label), type, options, required });
+            }
+          });
+        } else if (typeof value === 'object' && (value as any)?.groups) {
+          // Support legacy mgp_data payload wrapped as { groups: [...] }
+          const groupsArr = (value as any).groups;
+          if (Array.isArray(groupsArr)) {
+            groupsArr.forEach((g: any) => {
+              const label = g?.label ?? g?.name ?? g?.title ?? g?.titulo ?? '';
+              const keyRaw = g?.key ?? g?.id ?? label;
+              const groupKey = String(keyRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
+              const typeRaw = g?.type ?? g?.tipo;
+              const type = (String(typeRaw || '').toLowerCase() === 'radio' ? 'radio' : 'checkbox') as 'checkbox' | 'radio';
+              const requiredRaw = g?.required;
+              const required = typeof requiredRaw === 'string'
+                ? requiredRaw.toLowerCase() === 'yes'
+                : Boolean(requiredRaw);
+
+              const optionsSrc = Array.isArray(g?.options) ? g.options : (Array.isArray(g?.items) ? g.items : []);
+              const options = optionsSrc.map((o: any) => {
+                const optLabel = String(o?.label ?? o?.name ?? o?.titulo ?? o?.nombre ?? '').trim();
+                const optIdRaw = o?.id ?? o?.value ?? optLabel;
+                const optId = String(optIdRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
+                const priceRaw = o?.precio ?? o?.price ?? 0;
+                const priceNum = Number(priceRaw) || 0;
+                return { id: optId, label: optLabel, price: priceNum };
+              }).filter((o: any) => o.label);
+
+              if (groupKey && label && options.length > 0) {
+                groups.push({ key: groupKey, label: String(label), type, options, required });
+              }
+            });
+          }
+        }
+        else if (typeof value === 'object') {
+          if (value.options || value.items) {
+            const group: TopicGroup = {
+              key: key.toLowerCase().replace(/\s+/g, '_'),
+              label: value.label || key,
+              type: (value.type === 'radio' ? 'radio' : 'checkbox') as 'checkbox' | 'radio',
+              required: value.required || false,
+              options: (value.options || value.items || []).map((o: any) => ({
+                id: String(o.id || o.label || '').toLowerCase().replace(/\s+/g, '_'),
+                label: String(o.label || o.id || ''),
+                price: Number(o.price || 0)
+              }))
+            };
+            groups.push(group);
+          }
+        }
+      } catch {}
     });
+    
+    return groups;
+  }
+
+  private extractFromAttributes(): TopicGroup[] {
+    if (!this.product || !Array.isArray(this.product.attributes)) return [];
+    
+    const groups: TopicGroup[] = [];
+    
+    this.product.attributes.forEach((attr: any) => {
+      if (!attr?.name || !Array.isArray(attr?.options)) return;
+      
+      const label = attr.name;
+      const key = String(label).trim().toLowerCase().replace(/\s+/g, '_');
+      const isVariation = attr?.variation === true || attr?.visible === false;
+      
+      if (isVariation) return;
+      
+      const options = attr.options.map((opt: any, idx: number) => {
+        const optLabel = String(opt?.label ?? opt?.name ?? opt ?? `Option ${idx + 1}`).trim();
+        const optId = String(opt?.slug ?? opt?.label ?? opt ?? optLabel).trim().toLowerCase().replace(/\s+/g, '_');
+        return { id: optId, label: optLabel, price: 0 };
+      }).filter((o: TopicOption) => o.label);
+      
+      if (options.length > 0) {
+        groups.push({ key, label, type: 'checkbox', options, required: false });
+      }
+    });
+    
+    return groups;
   }
 
   private buildFallbackFromEnv(cats: any[]): TopicGroup[] {
     const topicsCfg = (environment as any)?.woocommerce?.pluginTopics || {};
-    const catNames = cats.reduce<string[]>((acc, c: any) => {
+    const catNames = (Array.isArray(cats) ? cats : []).reduce<string[]>((acc, c: any) => {
       const slug = (c?.slug || '').toString().toLowerCase();
       const name = (c?.name || '').toString().toLowerCase();
       if (slug) acc.push(slug);
@@ -143,7 +317,7 @@ export class ProductDetailPage implements OnInit {
       const t = topicsCfg[key];
       const names = (t?.categoryNames || []).map((s: string) => s.toLowerCase());
       const matches = names.some((n: string) => catNames.includes(n));
-      if (matches) {
+      if ((matches || catNames.length === 0) && Array.isArray(t?.options) && t.options.length > 0) {
         result.push({
           key,
           label: t?.label || key,

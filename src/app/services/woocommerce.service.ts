@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, throwError, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -186,13 +186,54 @@ export class WoocommerceService {
     );
   }
 
+  getCategoriesByIds(ids: number[]): Observable<any[]> {
+    // Prefer header-based auth first for main site, then fallback to query-based
+    const safeIds = (Array.isArray(ids) ? ids : []).filter((i) => Number.isFinite(i));
+    if (safeIds.length === 0) return of([]);
+    // Try header/auth first
+    const { url, params, headers } = this.buildApiUrl('/wc/v3/products/categories', undefined);
+    const withInclude = params.set('include', safeIds.join(','));
+    return this.http.get<any[]>(url, { params: withInclude, headers }).pipe(
+      catchError(() => {
+        // Fallback to query mode if header failed (401/403)
+        const fallback = this.buildApiUrl('/wc/v3/products/categories', 'query');
+        const p = fallback.params.set('include', safeIds.join(','));
+        return this.http.get<any[]>(fallback.url, { params: p, headers: fallback.headers }).pipe(
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  getAllCategories(perPage: number = 100): Observable<any[]> {
+    const { url, params, headers } = this.buildApiUrl('/wc/v3/products/categories', undefined);
+    const p = params.set('per_page', String(perPage));
+    return this.http.get<any[]>(url, { params: p, headers }).pipe(
+      catchError(() => {
+        const fallback = this.buildApiUrl('/wc/v3/products/categories', 'query');
+        const p2 = fallback.params.set('per_page', String(perPage));
+        return this.http.get<any[]>(fallback.url, { params: p2, headers: fallback.headers }).pipe(
+          catchError(() => of([]))
+        );
+      })
+    );
+  }
+
+  // Endpoint de flexi-categories para obtener categorías con subcategorías
+  getFlexiCategories(): Observable<any[]> {
+    const { url, params, headers } = this.buildApiUrl('/flexi-categories/v1/all', 'query');
+    return this.http.get<any[]>(url, { params, headers }).pipe(
+      catchError(() => of([]))
+    );
+  }
+
   getProductById(id: number): Observable<any> {
-    const { url, params, headers } = this.buildApiUrl(`/wc/v3/products/${id}`);
+    const { url, params, headers } = this.buildApiUrl(`/wc/v3/products/${id}?attributes=true&meta_data=true&categories=true`);
 
     return this.http.get<any>(url, { params, headers }).pipe(
       catchError((err) => {
         const is401 = err?.status === 401;
-        const fallback = this.buildApiUrl(`/wc/v3/products/${id}`, 'query');
+        const fallback = this.buildApiUrl(`/wc/v3/products/${id}?attributes=true&meta_data=true&categories=true`, 'query');
         if (is401) {
           return this.http.get<any>(fallback.url, { params: fallback.params, headers: fallback.headers });
         }
@@ -238,5 +279,16 @@ export class WoocommerceService {
     const { url, params, headers } = this.buildApiUrl(`/wc/v3/orders/${safeId}`);
 
     return this.http.get<any>(url, { params, headers });
+  }
+
+  getOrdersByCustomer(customerId: number, perPage: number = 100): Observable<any[]> {
+    const { url, params: baseParams, headers } = this.buildApiUrl('/wc/v3/orders');
+    const params = baseParams
+      .set('customer', String(customerId))
+      .set('per_page', String(perPage))
+      .set('orderby', 'date')
+      .set('order', 'desc');
+
+    return this.http.get<any[]>(url, { params, headers });
   }
 }

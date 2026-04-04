@@ -15,7 +15,9 @@ import {
   IonToolbar,
   IonSpinner,
   MenuController,
+  PopoverController,
 } from '@ionic/angular/standalone';
+import { StoreSelectorPopoverComponent } from '../components/store-selector-popover/store-selector-popover.component';
 import { WoocommerceService } from '../services/woocommerce.service';
 import { CartService } from '../services/cart.service';
 import { ThemeService } from '../services/theme.service';
@@ -37,6 +39,8 @@ import {
   iceCreamOutline,
   fastFoodOutline,
   fishOutline,
+  storefront,
+  chevronDown,
 } from 'ionicons/icons';
 
 @Component({
@@ -66,6 +70,9 @@ export class StorePage implements OnInit {
   private cartService = inject(CartService);
   private themeService = inject(ThemeService);
   private menuController = inject(MenuController);
+  private popoverController = inject(PopoverController);
+  
+  activeStoreName = 'Tienda Principal';
   
   constructor() {
     addIcons({
@@ -85,6 +92,8 @@ export class StorePage implements OnInit {
       iceCreamOutline,
       fastFoodOutline,
       fishOutline,
+      storefront,
+      chevronDown,
     });
   }
   
@@ -103,8 +112,25 @@ export class StorePage implements OnInit {
 
   ngOnInit() {
     this.menuController.enable(true, 'main-menu');
+    this.loadActiveStoreName();
     this.loadCategories();
     this.loadProducts();
+  }
+  
+  loadActiveStoreName() {
+    const activeSite = this.woocommerceService.getActiveSite();
+    this.activeStoreName = activeSite.name || 'Tienda Principal';
+  }
+  
+  async openStoreSelector(event: Event) {
+    const popover = await this.popoverController.create({
+      component: StoreSelectorPopoverComponent,
+      event: event,
+      side: 'bottom',
+      alignment: 'end',
+      cssClass: 'store-selector-popover',
+    });
+    await popover.present();
   }
 
   toggleTheme() {

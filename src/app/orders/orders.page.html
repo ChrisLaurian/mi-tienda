@@ -1,0 +1,87 @@
+<ion-content [fullscreen]="true" class="orders-content">
+  <!-- Yellow Header Section -->
+  <div class="header-section">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <span>&lt;</span>
+      </button>
+      <h1 class="page-title">Mis Pedidos</h1>
+      <div class="header-spacer"></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-section">
+    <!-- Tabs -->
+    <div class="order-tabs">
+      <button 
+        *ngFor="let tab of tabs" 
+        class="tab-btn"
+        [class.active]="activeTab === tab.id"
+        (click)="setActiveTab(tab.id)">
+        {{ tab.label }}
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Cargando pedidos...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredOrders.length === 0" class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#FFD54F" stroke-width="1.5">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path>
+        <rect x="9" y="3" width="6" height="4" rx="2" ry="2"></rect>
+        <line x1="9" y1="12" x2="15" y2="12"></line>
+        <line x1="9" y1="16" x2="13" y2="16"></line>
+      </svg>
+      <h3>Sin pedidos</h3>
+      <p>No tienes pedidos {{ activeTab !== 'all' ? getStatusLabel(activeTab).toLowerCase() + 's' : 'aún' }}</p>
+      <ion-button expand="block" routerLink="/store" class="shop-btn">
+        Ir a la tienda
+      </ion-button>
+    </div>
+
+    <!-- Orders List -->
+    <div class="orders-list" *ngIf="!isLoading && filteredOrders.length > 0">
+      <div class="order-card" *ngFor="let order of filteredOrders">
+        <div class="order-header">
+          <div class="order-info">
+            <span class="order-number">Pedido #{{ order.number }}</span>
+            <span class="order-date">{{ formatDate(order.date_created) }}</span>
+          </div>
+          <span class="order-status" [style.background-color]="getStatusColor(order.status) + '20'" [style.color]="getStatusColor(order.status)">
+            {{ getStatusLabel(order.status) }}
+          </span>
+        </div>
+        
+        <div class="order-items">
+          <div class="order-item" *ngFor="let item of order.line_items">
+            <img [src]="item.image || 'https://via.placeholder.com/60'" [alt]="item.name" class="item-thumb" />
+            <div class="item-info">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-price">S/ {{ item.price.toFixed(2) }}</span>
+            </div>
+            <span class="item-qty">x{{ item.quantity }}</span>
+          </div>
+        </div>
+        
+        <div class="order-footer">
+          <div class="order-total">
+            <span class="total-label">Total</span>
+            <span class="total-value">{{ order.total_formatted }}</span>
+          </div>
+          <button class="reorder-btn" (click)="reorderItems(order)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Repetir pedido
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
