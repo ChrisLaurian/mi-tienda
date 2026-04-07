@@ -103,18 +103,9 @@ export class WoocommerceService {
     const { key, secret } = this.getSiteKeys(site);
     let fullUrl = '';
     
-    // Siempre usamos URL directa para evitar problemas de proxy
     const restBase = site.usaIndexPhp ? '/index.php/wp-json' : '/wp-json';
     fullUrl = `${site.url}${restBase}${path}`;
-
-    console.log('=== buildApiUrl Debug ===');
-    console.log('site.id:', site.id);
-    console.log('site.url:', site.url);
-    console.log('path:', path);
-    console.log('fullUrl:', fullUrl);
-    console.log('key:', key ? key.substring(0, 10) + '...' : 'EMPTY');
-    console.log('=========================');
-
+    
     let params = new HttpParams();
     let headers = new HttpHeaders();
     const authMode = overrideMode || site.authMode || 'query';
@@ -140,25 +131,12 @@ export class WoocommerceService {
       params = params.set('category', String(categoryId));
     }
 
-    // Debug: mostrar URL completa
-    const fullDebugUrl = url + '?' + params.toString();
-    console.log('=== WooCommerce Products URL ===');
-    console.log(fullDebugUrl);
-    console.log('================================');
-
     return this.http.get<any[]>(url, { params, headers }).pipe(
       catchError((err) => {
-        console.error('=== WooCommerce API Error ===');
-        console.error('Status:', err?.status);
-        console.error('Message:', err?.message);
-        console.error('URL:', url);
-        console.error('================================');
-
         const isAuthError = err?.status === 401 || err?.status === 403;
         const fallback = this.buildApiUrl('/wc/v3/products', 'query');
         
         if (isAuthError || err?.status === 0) {
-          console.log('Trying fallback...');
           let params2 = fallback.params.set('page', page.toString()).set('per_page', perPage.toString());
           if (search?.trim()) params2 = params2.set('search', search.trim());
           if (typeof categoryId === 'number' && Number.isFinite(categoryId)) params2 = params2.set('category', String(categoryId));
@@ -224,6 +202,20 @@ export class WoocommerceService {
     const { url, params, headers } = this.buildApiUrl('/flexi-categories/v1/all', 'query');
     return this.http.get<any[]>(url, { params, headers }).pipe(
       catchError(() => of([]))
+    );
+  }
+
+  // Obtener las categorías con data de personalización para un producto específico
+  getProductCategoriesWithData(productId: number): Observable<any> {
+    const url = `https://appprot.whapruebas.com/index.php/wp-json/flexi-options/v1/topics/${productId}`;
+    
+    return this.http.get(url, { 
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      withCredentials: false
+    }).pipe(
+      catchError(() => of(null))
     );
   }
 

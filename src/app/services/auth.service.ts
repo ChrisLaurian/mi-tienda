@@ -26,15 +26,29 @@ export class AuthService {
   login(credentials: { username: string; password: string }) {
     return this.http.post(this.getBaseUrl('/wp-json/jwt-auth/v1/token'), credentials).pipe(
       tap((res: any) => {
-        console.log('JWT Response:', res);
         localStorage.setItem('access_token', res.token);
         localStorage.setItem('user_name', res.user_display_name || res.user_nicename || credentials.username);
         localStorage.setItem('user_email', res.user_email || credentials.username);
         localStorage.setItem('user_id', String(res.user_id || ''));
         localStorage.setItem('user_nicename', res.user_nicename || '');
+        localStorage.setItem('user_role', res.user_role || 'customer');
         this._isAuthenticated.next(true);
+        
+        if (res.token) {
+          this.fetchUserRole(res.user_id);
+        }
       })
     );
+  }
+
+  private fetchUserRole(userId: number | string) {
+    this.http.get<any>(this.getBaseUrl(`/wp-json/wp/v2/users/${userId}`)).subscribe({
+      next: (user) => {
+        const role = user.roles?.[0] || 'customer';
+        localStorage.setItem('user_role', role);
+      },
+      error: () => {}
+    });
   }
 
   register(userData: { 
@@ -45,7 +59,6 @@ export class AuthService {
     last_name?: string;
     billing?: any;
   }) {
-    // Usar HttpClient de Angular (funciona con el proxy)
     const formData = new URLSearchParams();
     formData.append('user_login', userData.email);
     formData.append('user_email', userData.email);
@@ -55,9 +68,6 @@ export class AuthService {
     formData.append('last_name', userData.last_name || '');
     formData.append('redirect_to', '');
     formData.append('wp-submit', 'Register');
-    
-    console.log('=== Registration ===');
-    console.log('Email:', userData.email);
     
     return this.http.post(
       this.getBaseUrl('/wp-login.php?action=register'),
@@ -92,6 +102,12 @@ export class AuthService {
     localStorage.removeItem('user_name');
     localStorage.removeItem('user_email');
     localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
     this._isAuthenticated.next(false);
+  }
+
+  isAdmin(): boolean {
+    const role = localStorage.getItem('user_role');
+    return role === 'administrator' || role === 'admin';
   }
 }

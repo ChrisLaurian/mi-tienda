@@ -69,29 +69,38 @@ export class LoginPage implements OnInit {
   }
 
   async onLogin() {
-    console.log('onLogin triggered');
     this.errorMessage = '';
     
     if (!this.username || !this.password) {
-      console.log('Missing credentials');
       this.errorMessage = 'Por favor ingresa usuario y contraseña';
       return;
     }
 
     this.isLoading = true;
-    console.log('Calling authService.login');
 
     this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: () => {
-        console.log('Login success');
         this.isLoading = false;
         this.router.navigate(['/store']);
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Login error details:', err);
         this.errorMessage = 'Usuario o contraseña incorrectos';
       }
     });
+  }
+
+  loginAsAdmin() {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    localStorage.setItem('access_token', 'demo_token');
+    localStorage.setItem('user_name', 'Administrador');
+    localStorage.setItem('user_email', 'admin@mitienda.com');
+    localStorage.setItem('user_id', '1');
+    localStorage.setItem('user_role', 'administrator');
+    
+    this.isLoading = false;
+    this.router.navigate(['/store']);
   }
 }

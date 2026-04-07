@@ -58,31 +58,44 @@
         <p>El producto no tiene categorías</p>
       </div>
       
-      <!-- Debug info -->
-      <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; font-size: 12px;">
-        <p><strong>Debug info:</strong></p>
-        <p>enrichedCategories: {{ enrichedCategories | json }}</p>
-      </div>
-      
       <div *ngIf="product.categories && product.categories.length > 0">
-        <div *ngFor="let c of (enrichedCategories?.length ? enrichedCategories : product.categories)" style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px;">
-          <p><strong>Categoría:</strong> {{ c?.name || c?.slug || c?.id }}</p>
-          <p *ngIf="c?.id">ID: {{ c.id }}</p>
-          <p *ngIf="c?.description">Descripción: {{ c.description }}</p>
-          <p *ngIf="c?.slug">Slug: {{ c.slug }}</p>
-          <p *ngIf="c?.count">Conteo: {{ c.count }}</p>
-          
-          <!-- Subcategorías -->
-          <div *ngIf="c?.children && c.children.length > 0" style="margin-left: 20px; margin-top: 10px;">
-            <p><strong>Subcategorías ({{c.children.length}}):</strong></p>
-            <ul>
-              <li *ngFor="let child of c.children">
-                {{ child.name || child.slug }} (ID: {{child.id}})
-              </li>
-            </ul>
+        <div *ngFor="let c of enrichedCategories" class="category-card">
+          <div class="category-header">
+            <span class="category-name">{{ c?.name || c?.slug || c?.id }}</span>
           </div>
-          <div *ngIf="!c?.children || c.children.length === 0" style="margin-left: 20px; margin-top: 10px; color: #888;">
-            <em>Sin subcategorías</em>
+          
+          <!-- Data de personalización (subcategorías) -->
+          <div *ngIf="c?.data && c.data.length > 0" class="category-options">
+            <div *ngFor="let item of c.data" class="option-group">
+              <div class="option-header">
+                <span class="option-title">{{ item.titulo }}</span>
+                <span class="option-required" *ngIf="item.required === 'yes'">Requerido</span>
+                <span class="option-type">{{ item.tipo === 'radio' ? 'Selecciona uno' : 'Selecciona varios' }}</span>
+              </div>
+              
+              <div class="option-items" [class.checkbox-group]="item.tipo === 'checkbox'" [class.radio-group]="item.tipo === 'radio'">
+                <div *ngFor="let opt of item.items" 
+                     class="option-item"
+                     [class.selected]="isOptionSelected(c.id, item.titulo, opt.nombre)"
+                     (click)="toggleCategoryOption(c.id, item.titulo, opt.nombre, item.tipo)">
+                  <div class="option-checkbox" *ngIf="item.tipo === 'checkbox'">
+                    <div class="checkbox-inner" *ngIf="isOptionSelected(c.id, item.titulo, opt.nombre)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="option-radio" *ngIf="item.tipo === 'radio'">
+                    <div class="radio-inner" *ngIf="isOptionSelected(c.id, item.titulo, opt.nombre)"></div>
+                  </div>
+                  <div class="option-content">
+                    <span class="option-name">{{ opt.nombre }}</span>
+                    <span class="option-price" *ngIf="opt.precio > 0">+S/ {{ opt.precio }}</span>
+                    <span class="option-price free" *ngIf="!opt.precio || opt.precio === 0">Gratis</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

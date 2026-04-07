@@ -181,3 +181,16 @@
     display: inline-block;
   }
 }
+
+.admin-btn {
+  --background: #333333;
+  --background-hover: #222222;
+  --background-activated: #222222;
+  --color: #FFFFFF;
+  --border-radius: 30px;
+  --box-shadow: none;
+  height: 50px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}

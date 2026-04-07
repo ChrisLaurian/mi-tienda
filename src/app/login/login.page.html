@@ -67,9 +67,19 @@
         </div>
       </div>
 
-      <div class="demo-hint">
-        <p>Demo: Admin / Root</p>
+        <div class="demo-hint">
+          <p>Demo: Admin / Root</p>
+        </div>
+
+        <ion-button 
+          expand="block" 
+          class="admin-btn"
+          (click)="loginAsAdmin()"
+          [disabled]="isLoading"
+        >
+          <ion-spinner *ngIf="isLoading" name="crescent" color="light"></ion-spinner>
+          <span *ngIf="!isLoading">ENTRAR COMO ADMINISTRADOR</span>
+        </ion-button>
       </div>
-    </div>
   </div>
 </ion-content>

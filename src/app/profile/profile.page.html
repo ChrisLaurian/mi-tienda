@@ -136,6 +136,11 @@
         Mis Pedidos
       </ion-button>
 
+      <!-- Admin Promotions Button -->
+      <ion-button *ngIf="isAdminUser" expand="block" class="orders-btn" routerLink="/promotions">
+        Gestionar Promociones
+      </ion-button>
+
       <!-- Logout Button -->
       <ion-button expand="block" class="logout-btn" fill="outline" (click)="logout()">
         Cerrar Sesión

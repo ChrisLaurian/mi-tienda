@@ -1,0 +1,70 @@
+<ion-content [fullscreen]="true" class="promotions-content">
+  <div class="header-section">
+    <div class="header-top">
+      <button class="back-btn" routerLink="/profile">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+      <h1 class="page-title">Promociones</h1>
+      <a routerLink="/promotions/new" class="add-btn">
+        <ion-icon name="add"></ion-icon>
+      </a>
+    </div>
+  </div>
+
+  <div class="promotions-list">
+    <div *ngIf="isLoading" class="loading">
+      <p>Cargando...</p>
+    </div>
+
+    <div *ngIf="!isLoading && promotions.length === 0" class="empty">
+      <p>No hay promociones</p>
+      <a routerLink="/promotions/new" class="create-btn">Crear primera promoción</a>
+    </div>
+
+    <div *ngFor="let promo of promotions" class="promo-card">
+      <div class="promo-header">
+        <h3 class="promo-title">{{ promo.title }}</h3>
+        <span class="promo-status" [ngClass]="getStatusClass(promo)">
+          {{ getStatus(promo) }}
+        </span>
+      </div>
+      
+      <p class="promo-description">{{ promo.description }}</p>
+      
+      <div class="promo-discount">
+        <span *ngIf="promo.discount_type === 'percentage'">{{ promo.discount_value }}%</span>
+        <span *ngIf="promo.discount_type === 'fixed'">S/ {{ promo.discount_value }}</span>
+        <span *ngIf="promo.code" class="promo-code">{{ promo.code }}</span>
+      </div>
+      
+      <div class="promo-dates">
+        <span>{{ formatDate(promo.start_date) }} - {{ formatDate(promo.end_date) }}</span>
+      </div>
+      
+      <div class="promo-products" *ngIf="promo.product_ids?.length">
+        <span>{{ promo.product_ids.length }} producto(s)</span>
+      </div>
+
+      <div class="promo-actions">
+        <a [routerLink]="['/promotions', promo.id]" class="action-btn edit">
+          <ion-icon name="create"></ion-icon>
+        </a>
+        <button class="action-btn delete" (click)="confirmDelete(promo)">
+          <ion-icon name="trash"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <ion-modal [isOpen]="showDeleteModal" (didDismiss)="cancelDelete()">
+    <div class="modal-content">
+      <h2>Eliminar Promoción</h2>
+      <p>¿Estás seguro de eliminar "{{ promotionToDelete?.title }}"?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Cancelar</button>
+        <button class="btn-delete" (click)="deletePromotion()">Eliminar</button>
+      </div>
+    </div>
+  </ion-modal>
+</ion-content>

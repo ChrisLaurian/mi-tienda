@@ -1,0 +1,90 @@
+<ion-content [fullscreen]="true" class="promo-form-content">
+  <div class="header-section">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+      <h1 class="page-title">{{ isEditing ? 'Editar' : 'Nueva' }} Promoción</h1>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="form-content" *ngIf="!isLoading">
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" [(ngModel)]="promotion.title" placeholder="Nombre de la promoción">
+    </div>
+
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea [(ngModel)]="promotion.description" placeholder="Descripción de la promoción" rows="3"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo de descuento</label>
+        <select [(ngModel)]="promotion.discount_type">
+          <option value="percentage">Porcentaje (%)</option>
+          <option value="fixed">Monto fijo (S/)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Valor del descuento</label>
+        <input type="number" [(ngModel)]="promotion.discount_value" placeholder="0">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Código promocional (opcional)</label>
+      <input type="text" [(ngModel)]="promotion.code" placeholder="Ej: VERANO20">
+    </div>
+
+    <div class="form-group">
+      <label>Fecha inicio</label>
+      <input type="datetime-local" [ngModel]="promotion.start_date" (ngModelChange)="onDateChange('start_date', $event)">
+    </div>
+
+    <div class="form-group">
+      <label>Fecha fin</label>
+      <input type="datetime-local" [ngModel]="promotion.end_date" (ngModelChange)="onDateChange('end_date', $event)">
+    </div>
+
+    <div class="form-group">
+      <label>Activa</label>
+      <div class="toggle-wrapper">
+        <ion-toggle [(ngModel)]="promotion.active"></ion-toggle>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Productos aplicados (opcional)</label>
+      <p class="help-text">Selecciona los productos que aplican a esta promoción. Si no seleccionas ninguno, aplicará a todos.</p>
+      <div class="checkbox-list">
+        <div *ngFor="let product of products" class="checkbox-item">
+          <input type="checkbox" [checked]="promotion.product_ids?.includes(product.id)" (change)="toggleProduct(product.id)">
+          <span>{{ product.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Categorías aplicadas (opcional)</label>
+      <p class="help-text">Selecciona las categorías que aplican a esta promoción.</p>
+      <div class="checkbox-list">
+        <div *ngFor="let cat of categories" class="checkbox-item">
+          <input type="checkbox" [checked]="promotion.category_ids?.includes(cat.id)" (change)="toggleCategory(cat.id)">
+          <span>{{ cat.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" (click)="save()" [disabled]="isSaving || !promotion.title">
+      {{ isSaving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <p>Cargando...</p>
+  </div>
+</ion-content>

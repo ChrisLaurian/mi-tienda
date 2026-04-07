@@ -41,6 +41,7 @@ export class ProductDetailPage implements OnInit {
   isLoading = true;
   product: any | null = null;
   enrichedCategories: any[] = [];
+  selectedCategoryOptions: Record<string, Record<string, Set<string>>> = {};
   cartCount$ = this.cartService.totalQuantity$;
   topicsToRender: TopicGroup[] = [];
   selectedByTopic: Record<string, Set<string>> = {};
@@ -52,43 +53,97 @@ export class ProductDetailPage implements OnInit {
     addIcons({ cartOutline });
   }
 
-  private loadCategoriesInterior(categories: any[]) {
-    console.log('loadCategoriesInterior called');
-    console.log('categories input:', categories);
+  isOptionSelected(categoryId: number, optionGroup: string, optionName: string): boolean {
+    const key = String(categoryId);
+    if (this.selectedCategoryOptions[key] && this.selectedCategoryOptions[key][optionGroup]) {
+      return this.selectedCategoryOptions[key][optionGroup].has(optionName);
+    }
+    return false;
+  }
+
+  toggleCategoryOption(categoryId: number, optionGroup: string, optionName: string, optionType: string) {
+    const key = String(categoryId);
+    if (!this.selectedCategoryOptions[key]) {
+      this.selectedCategoryOptions[key] = {};
+    }
+    if (!this.selectedCategoryOptions[key][optionGroup]) {
+      this.selectedCategoryOptions[key][optionGroup] = new Set<string>();
+    }
     
+    if (optionType === 'radio') {
+      this.selectedCategoryOptions[key][optionGroup] = new Set<string>([optionName]);
+    } else {
+      if (this.selectedCategoryOptions[key][optionGroup].has(optionName)) {
+        this.selectedCategoryOptions[key][optionGroup].delete(optionName);
+      } else {
+        this.selectedCategoryOptions[key][optionGroup].add(optionName);
+      }
+    }
+  }
+
+  private loadCategoriesInterior(categories: any[], productId: number) {
     if (!categories || categories.length === 0) {
       this.enrichedCategories = [];
       return;
     }
     
-    // Primero mostramos las categorías principales directamente
-    this.enrichedCategories = categories.map(c => ({ ...c, children: [] }));
-    console.log('enrichedCategories initial:', this.enrichedCategories);
+    this.enrichedCategories = categories.map(c => ({ ...c, data: [] }));
     
-    // Usamos el endpoint flexi-categories para obtener las categorías con subcategorías
-    this.woocommerceService.getFlexiCategories().subscribe({
-      next: (flexiCats: any[]) => {
-        console.log('Flexi categories count:', flexiCats ? flexiCats.length : 0);
-        console.log('Flexi categories sample:', flexiCats ? flexiCats[0] : null);
-        
-        if (Array.isArray(flexiCats) && flexiCats.length > 0) {
-          // Buscar subcategorías para cada categoría del producto
+    this.woocommerceService.getProductCategoriesWithData(productId).subscribe({
+      next: (flexiData: any) => {
+        if (flexiData && Array.isArray(flexiData) && flexiData.length > 0) {
           const enriched = this.enrichedCategories.map(cat => {
-            // Buscar en flexi-categories la categoría y sus hijos
-            const flexiCat = flexiCats.find(fc => Number(fc.id) === Number(cat.id));
-            const children = flexiCat && flexiCat.children ? flexiCat.children : [];
-            console.log('Category', cat.id, 'has', children.length, 'subcategories');
-            return { ...cat, children: children };
+            return { ...cat, data: flexiData };
           });
-          
           this.enrichedCategories = enriched;
-          console.log('Final enriched:', this.enrichedCategories);
+        } else {
+          const devData = this.getDevCategoriesData(productId);
+          if (devData && devData.length > 0) {
+            const enriched = this.enrichedCategories.map(cat => {
+              return { ...cat, data: devData };
+            });
+            this.enrichedCategories = enriched;
+          }
         }
       },
-      error: (err) => {
-        console.log('getFlexiCategories error:', err);
+      error: () => {
+        const devData = this.getDevCategoriesData(productId);
+        if (devData && devData.length > 0) {
+          const enriched = this.enrichedCategories.map(cat => {
+            return { ...cat, data: devData };
+          });
+          this.enrichedCategories = enriched;
+        }
       }
     });
+  }
+  
+  private getDevCategoriesData(productId: number): any[] {
+    // Datos de ejemplo basados en lo que mostraste
+    return [
+      {
+        titulo: 'Frutas',
+        required: 'no',
+        tipo: 'checkbox',
+        layout: 'vertical',
+        items: [
+          { nombre: 'Fresa', precio: 0, stock: 'yes' },
+          { nombre: 'Durazno', precio: 0, stock: 'yes' },
+          { nombre: 'Platano', precio: 0, stock: 'yes' }
+        ]
+      },
+      {
+        titulo: 'Tamaño',
+        required: 'yes',
+        tipo: 'radio',
+        layout: 'vertical',
+        items: [
+          { nombre: 'Ch', precio: 0, stock: 'yes' },
+          { nombre: 'M', precio: 0, stock: 'yes' },
+          { nombre: 'G', precio: 0, stock: 'yes' }
+        ]
+      }
+    ];
   }
 
   private mockCategories(ids: number[]): any[] {
@@ -107,21 +162,11 @@ export class ProductDetailPage implements OnInit {
     this.woocommerceService.getProductById(id).subscribe({
       next: (data) => {
         this.product = data;
-        console.log('=== PRODUCTO COMPLETO ===');
-        console.log('data:', data);
-        console.log('categories:', data?.categories);
-        console.log('====================');
-        if (data && data.categories) {
-          console.log('Categories tiene datos:', data.categories);
-        }
         this.loadTopics();
-        this.loadCategoriesInterior(data?.categories || []);
+        this.loadCategoriesInterior(data?.categories || [], id);
         this.isLoading = false;
       },
-      error: (err) => {
-        console.log('=== ERROR getProductById ===');
-        console.log('err:', err);
-        console.log('==========================');
+      error: () => {
         this.product = null;
         this.isLoading = false;
       },
@@ -161,21 +206,17 @@ export class ProductDetailPage implements OnInit {
     const groups: TopicGroup[] = [];
     
     const fromMeta = this.extractFromMetaData();
-    console.log('fromMeta:', fromMeta);
     groups.push(...fromMeta);
     
     const fromAttrs = this.extractFromAttributes();
-    console.log('fromAttrs:', fromAttrs);
     groups.push(...fromAttrs);
     
-    // If no topics found from product data, fall back to environment-defined topics
     if (groups.length === 0) {
       const cats = Array.isArray(this.product?.categories) ? this.product.categories : [];
       const fallback = this.buildFallbackFromEnv(cats);
       groups.push(...fallback);
     }
     
-    console.log('final groups (after fallback):', groups);
     this.applyTopics(groups);
   }
 

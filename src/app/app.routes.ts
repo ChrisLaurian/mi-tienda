@@ -50,6 +50,14 @@ export const routes: Routes = [
     loadComponent: () => import('./orders/orders.page').then((m) => m.OrdersPage),
   },
   {
+    path: 'promotions',
+    loadComponent: () => import('./promotions/promotions-list.page').then((m) => m.PromotionsListPage),
+  },
+  {
+    path: 'promotions/:id',
+    loadComponent: () => import('./promotions/promotion-form.page').then((m) => m.PromotionFormPage),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',

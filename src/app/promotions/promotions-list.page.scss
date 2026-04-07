@@ -1,0 +1,239 @@
+.promotions-content {
+  --background: var(--color-cream);
+}
+
+.header-section {
+  background: var(--color-yellow) !important;
+  padding: 20px 20px 40px;
+  position: relative;
+  border-radius: 0 0 30px 30px;
+  text-align: center;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  ion-icon {
+    font-size: 24px;
+    color: var(--color-dark-brown);
+  }
+}
+
+.page-title {
+  color: var(--color-dark-brown) !important;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.add-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-orange) !important;
+  color: var(--color-white) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  text-decoration: none;
+}
+
+.promotions-list {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-text-secondary);
+}
+
+.create-btn {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: var(--color-orange) !important;
+  color: var(--color-white) !important;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.promo-card {
+  background: var(--color-white) !important;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.promo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.promo-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-dark-brown) !important;
+  margin: 0;
+}
+
+.promo-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 10px;
+  
+  &.status-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  &.status-scheduled {
+    background: #fff3e0;
+    color: #ef6c00;
+  }
+  
+  &.status-expired {
+    background: #ffebee;
+    color: #c62828;
+  }
+  
+  &.status-inactive {
+    background: #f5f5f5;
+    color: #757575;
+  }
+}
+
+.promo-description {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px;
+}
+
+.promo-discount {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-orange) !important;
+  margin-bottom: 8px;
+  
+  .promo-code {
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--color-cream);
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-left: 8px;
+  }
+}
+
+.promo-dates {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.promo-products {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.promo-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-cream);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &.edit {
+    background: var(--color-cream);
+    color: var(--color-dark-brown);
+    
+    &:hover {
+      background: var(--color-yellow);
+    }
+  }
+  
+  &.delete {
+    background: #ffebee;
+    color: #c62828;
+    
+    &:hover {
+      background: #ffcdd2;
+    }
+  }
+}
+
+.modal-content {
+  padding: 24px;
+  background: var(--color-white);
+  border-radius: 16px;
+  text-align: center;
+  
+  h2 {
+    margin: 0 0 16px;
+    color: var(--color-dark-brown);
+  }
+  
+  p {
+    margin: 0 0 24px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-cancel, .btn-delete {
+  padding: 12px 24px;
+  border-radius: 25px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background: var(--color-cream);
+  color: var(--color-dark-brown);
+}
+
+.btn-delete {
+  background: #c62828;
+  color: white;
+}

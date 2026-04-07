@@ -39,6 +39,7 @@ export class ProfilePage implements OnInit {
 
   isLoading = true;
   isLoggedIn = false;
+  isAdminUser = false;
 
   user: any = {
     name: 'Usuario',
@@ -80,6 +81,9 @@ export class ProfilePage implements OnInit {
     const userName = localStorage.getItem('user_name');
     const userEmail = localStorage.getItem('user_email');
     const userId = localStorage.getItem('user_id');
+    const userRole = localStorage.getItem('user_role');
+    
+    this.isAdminUser = userRole === 'administrator' || userRole === 'admin';
     
     this.user = {
       name: userName || 'Usuario',
