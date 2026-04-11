@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { Browser } from '@capacitor/browser';
 import {
   IonBackButton,
@@ -18,11 +18,20 @@ import {
   IonTextarea,
   IonTitle,
   IonToolbar,
+  IonRadioGroup,
+  IonRadio,
 } from '@ionic/angular/standalone';
 import { CartService } from '../services/cart.service';
 import { WoocommerceService } from '../services/woocommerce.service';
 import { environment } from '../../environments/environment';
 import { ThemeService } from '../services/theme.service';
+
+interface PaymentGateway {
+  id: string;
+  title: string;
+  description: string;
+  enabled: boolean;
+}
 
 @Component({
   selector: 'app-checkout',
@@ -31,6 +40,7 @@ import { ThemeService } from '../services/theme.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterLink,
     ReactiveFormsModule,
     IonHeader,
@@ -47,6 +57,8 @@ import { ThemeService } from '../services/theme.service';
     IonButton,
     IonText,
     IonSpinner,
+    IonRadioGroup,
+    IonRadio,
   ],
 })
 export class CheckoutPage implements OnInit, OnDestroy {
@@ -63,6 +75,9 @@ export class CheckoutPage implements OnInit, OnDestroy {
   paymentUrl = '';
   isPaid = false;
   private removeBrowserFinishedListener: (() => void) | null = null;
+
+  paymentGateways: PaymentGateway[] = [];
+  selectedPaymentMethod = 'cod';
 
   form = this.fb.group({
     firstName: ['', [Validators.required]],
@@ -83,11 +98,24 @@ export class CheckoutPage implements OnInit, OnDestroy {
       this.router.navigateByUrl('/cart');
     }
 
+    this.loadPaymentGateways();
+
     const handle = await Browser.addListener('browserFinished', () => {
       if (!this.createdOrder?.id) return;
       this.refreshOrderStatus();
     });
     this.removeBrowserFinishedListener = () => handle.remove();
+  }
+
+  loadPaymentGateways() {
+    this.woocommerceService.getPaymentGateways().subscribe({
+      next: (gateways) => {
+        this.paymentGateways = gateways.filter((g: any) => g.enabled);
+      },
+      error: () => {
+        this.paymentGateways = [];
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -136,9 +164,12 @@ export class CheckoutPage implements OnInit, OnDestroy {
     };
 
     const coupon = this.cartService.getCouponSnapshot();
+    const paymentMethodTitle = this.getPaymentMethodTitle();
     const payload = {
       status: 'pending',
       set_paid: false,
+      payment_method: this.selectedPaymentMethod,
+      payment_method_title: paymentMethodTitle,
       customer_note: value.notes || '',
       billing,
       shipping,
@@ -250,5 +281,13 @@ export class CheckoutPage implements OnInit, OnDestroy {
 
   toggleTheme() {
     this.themeService.toggle();
+  }
+
+  getPaymentMethodTitle(): string {
+    if (this.selectedPaymentMethod === 'cod') {
+      return 'Contra entrega';
+    }
+    const gateway = this.paymentGateways.find(g => g.id === this.selectedPaymentMethod);
+    return gateway?.title || this.selectedPaymentMethod;
   }
 }

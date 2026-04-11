@@ -6,9 +6,19 @@
         <span style="font-size: 24px; font-weight: 300; color: var(--color-dark-brown);">&lt;</span>
       </button>
       <h1 class="page-title">{{ product?.name || 'Producto' }}</h1>
-      <button class="favorite-btn" (click)="toggleFavorite()">
-        <span style="font-size: 24px; font-weight: 300; color: var(--color-dark-brown);">{{ isFavorite ? '♥' : '♡' }}</span>
-      </button>
+      <div class="header-actions">
+        <button class="favorite-btn" (click)="toggleFavorite()">
+          <span style="font-size: 24px; font-weight: 300; color: var(--color-dark-brown);">{{ isFavorite ? '♥' : '♡' }}</span>
+        </button>
+        <button class="cart-btn" routerLink="/cart">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" fill="var(--color-dark-brown)"/>
+            <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" fill="var(--color-dark-brown)"/>
+            <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8703 16.009 20.3278 15.8526 20.6935 15.5583C21.0591 15.264 21.3096 14.8504 21.4 14.39L23 6H6" stroke="var(--color-dark-brown)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="cart-badge" *ngIf="(cartCount$ | async) as count">{{ count }}</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -50,49 +60,35 @@
       <p class="product-description" [innerHTML]="product.short_description || product.description"></p>
     </div>
 
-    <!-- Debug: show product categories when available --> 
-    <div class="categories-section" *ngIf="product">
-      <h3 class="section-title">Categorías</h3>
+    <!-- Personaliza tu pedido - Solo categorías del producto -->
+    <div class="toppings-section" *ngIf="hasPersonalizationData()">
+      <h3 class="section-title">Personaliza tu pedido</h3>
       
-      <div *ngIf="!product.categories || product.categories.length === 0">
-        <p>El producto no tiene categorías</p>
-      </div>
-      
-      <div *ngIf="product.categories && product.categories.length > 0">
-        <div *ngFor="let c of enrichedCategories" class="category-card">
-          <div class="category-header">
-            <span class="category-name">{{ c?.name || c?.slug || c?.id }}</span>
-          </div>
-          
-          <!-- Data de personalización (subcategorías) -->
-          <div *ngIf="c?.data && c.data.length > 0" class="category-options">
-            <div *ngFor="let item of c.data" class="option-group">
-              <div class="option-header">
-                <span class="option-title">{{ item.titulo }}</span>
-                <span class="option-required" *ngIf="item.required === 'yes'">Requerido</span>
-                <span class="option-type">{{ item.tipo === 'radio' ? 'Selecciona uno' : 'Selecciona varios' }}</span>
-              </div>
-              
-              <div class="option-items" [class.checkbox-group]="item.tipo === 'checkbox'" [class.radio-group]="item.tipo === 'radio'">
-                <div *ngFor="let opt of item.items" 
-                     class="option-item"
-                     [class.selected]="isOptionSelected(c.id, item.titulo, opt.nombre)"
-                     (click)="toggleCategoryOption(c.id, item.titulo, opt.nombre, item.tipo)">
-                  <div class="option-checkbox" *ngIf="item.tipo === 'checkbox'">
-                    <div class="checkbox-inner" *ngIf="isOptionSelected(c.id, item.titulo, opt.nombre)">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    </div>
+      <!-- Opciones de personalización desde API -->
+      <div class="category-card" *ngFor="let c of enrichedCategories">
+        <div class="category-options" *ngIf="c?.data && c.data.length > 0">
+          <div class="option-group" *ngFor="let item of c.data">
+            <div class="topic-header">
+              <span class="topic-name">{{ item.titulo }}</span>
+              <span class="topic-type" *ngIf="item.required === 'yes'">Requerido</span>
+              <span class="topic-type">{{ item.tipo === 'radio' ? 'Selecciona uno' : 'Selecciona varios' }}</span>
+            </div>
+            
+            <div class="options-list">
+              <div class="option-item" 
+                   *ngFor="let opt of item.items"
+                   [class.selected]="isOptionSelected(c.id, item.titulo, opt.nombre)"
+                   (click)="toggleCategoryOption(c.id, item.titulo, opt.nombre, item.tipo)">
+                <div class="option-checkbox">
+                  <div class="checkbox-inner" *ngIf="isOptionSelected(c.id, item.titulo, opt.nombre)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                   </div>
-                  <div class="option-radio" *ngIf="item.tipo === 'radio'">
-                    <div class="radio-inner" *ngIf="isOptionSelected(c.id, item.titulo, opt.nombre)"></div>
-                  </div>
-                  <div class="option-content">
-                    <span class="option-name">{{ opt.nombre }}</span>
-                    <span class="option-price" *ngIf="opt.precio > 0">+S/ {{ opt.precio }}</span>
-                    <span class="option-price free" *ngIf="!opt.precio || opt.precio === 0">Gratis</span>
-                  </div>
+                </div>
+                <div class="option-info">
+                  <span class="option-name">{{ opt.nombre }}</span>
+                  <span class="option-price" *ngIf="opt.precio > 0">+ S/ {{ opt.precio }}</span>
                 </div>
               </div>
             </div>
@@ -100,42 +96,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Add on ingredients Section -->
-    <ng-container *ngIf="topicsToRender.length > 0">
-      <div class="toppings-section">
-        <h3 class="section-title">Personaliza tu pedido</h3>
-        
-        <div class="topic-card" *ngFor="let topic of topicsToRender">
-          <div class="topic-header">
-            <h4 class="topic-name">{{ topic.label }}</h4>
-            <span class="topic-type" *ngIf="topic.type === 'radio'">Selecciona uno</span>
-            <span class="topic-type" *ngIf="topic.type !== 'radio'">Selecciona varios</span>
-            <span class="required-badge" *ngIf="topic.required">Requerido</span>
-          </div>
-          
-          <div class="options-list">
-            <div class="option-item" 
-                 *ngFor="let opt of topic.options"
-                 [class.selected]="selectedByTopic[topic.key]?.has(opt.id)"
-                 (click)="toggleOption(topic.key, opt.id, !selectedByTopic[topic.key]?.has(opt.id))">
-              <div class="option-checkbox">
-                <div class="checkbox-inner" *ngIf="selectedByTopic[topic.key]?.has(opt.id)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </div>
-              </div>
-              <div class="option-info">
-                <span class="option-name">{{ opt.label }}</span>
-                <span class="option-price" *ngIf="opt.price && opt.price > 0">+ S/ {{ opt.price.toFixed(2) }}</span>
-                <span class="option-price free" *ngIf="!opt.price || opt.price === 0">Gratis</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ng-container>
   </div>
 
     <!-- Add to Cart Button (Fixed at bottom) -->

@@ -5,53 +5,80 @@
       <button class="back-btn" (click)="goBack()" style="background: transparent; border: none; cursor: pointer;">
         <span style="font-size: 24px; font-weight: 300; color: var(--color-white);">&lt;</span>
       </button>
-      <h1 class="page-title">Método de Pago</h1>
+      <h1 class="page-title">Pago con Tarjeta</h1>
       <div class="header-spacer"></div>
     </div>
   </div>
 
   <div class="payment-card">
-    <h2 class="section-title">Seleccionar Tarjeta</h2>
-    
-    <div class="payment-options">
-      <div class="payment-option selected">
-        <ion-icon name="card-outline"></ion-icon>
-        <div class="card-info">
-          <span class="card-name">Visa **** 1234</span>
-          <span class="card-expiry">Expira: 12/26</span>
-        </div>
-        <ion-icon name="radio-button-on" class="radio-icon"></ion-icon>
+    <!-- Datos del cliente (solo si no está logueado) -->
+    <div class="card-form" *ngIf="!isLoggedIn()">
+      <h2 class="section-title">Datos del Cliente</h2>
+      
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <ion-input type="text" [(ngModel)]="guestName" placeholder="Tu nombre completo" class="custom-input"></ion-input>
       </div>
 
-      <div class="payment-option">
-        <ion-icon name="card-outline"></ion-icon>
-        <div class="card-info">
-          <span class="card-name">Mastercard **** 5678</span>
-          <span class="card-expiry">Expira: 08/28</span>
-        </div>
-        <ion-icon name="radio-button-off" class="radio-icon"></ion-icon>
+      <div class="form-group">
+        <label>Email</label>
+        <ion-input type="email" [(ngModel)]="guestEmail" placeholder="tu@email.com" class="custom-input"></ion-input>
+      </div>
+
+      <div class="form-group">
+        <label>Teléfono</label>
+        <ion-input type="tel" [(ngModel)]="guestPhone" placeholder="999999999" class="custom-input"></ion-input>
       </div>
     </div>
 
-    <button class="add-card-btn">+ Añadir Nueva Tarjeta</button>
+    <div class="card-form">
+      <h2 class="section-title">Datos de la Tarjeta</h2>
+      
+      <div class="form-group">
+        <label>Nombre del titular</label>
+        <ion-input type="text" [(ngModel)]="cardName" placeholder="Nombre como aparece en la tarjeta" class="custom-input"></ion-input>
+      </div>
+
+      <div class="form-group">
+        <label>Número de tarjeta</label>
+        <ion-input type="tel" [(ngModel)]="cardNumber" placeholder="1234 5678 9012 3456" class="custom-input" maxlength="19"></ion-input>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de expiración</label>
+          <ion-input type="text" [(ngModel)]="cardExpiry" placeholder="MM/AA" class="custom-input" maxlength="5"></ion-input>
+        </div>
+        <div class="form-group">
+          <label>CVV</label>
+          <ion-input type="password" [(ngModel)]="cardCVV" placeholder="123" class="custom-input" maxlength="4"></ion-input>
+        </div>
+      </div>
+
+      <div class="secure-badge">
+        <ion-icon name="lock-closed-outline"></ion-icon>
+        <span>Tu pago está protegido con SSL</span>
+      </div>
+    </div>
 
     <div class="order-summary">
       <div class="summary-row">
         <span>Subtotal</span>
-        <span>$45.00</span>
+        <span>S/ {{ total$ | async }}</span>
       </div>
       <div class="summary-row">
         <span>Envío</span>
-        <span>$5.00</span>
+        <span>S/ 0.00</span>
       </div>
       <div class="summary-row total">
         <span>Total</span>
-        <span>$50.00</span>
+        <span>S/ {{ total$ | async }}</span>
       </div>
     </div>
 
-    <ion-button expand="block" class="pay-btn" (click)="onPay()">
-      PAGAR AHORA
+    <ion-button expand="block" class="pay-btn" (click)="onPay()" [disabled]="isProcessing">
+      <span *ngIf="!isProcessing">PAGAR AHORA</span>
+      <ion-spinner *ngIf="isProcessing" name="crescent"></ion-spinner>
     </ion-button>
   </div>
 </ion-content>

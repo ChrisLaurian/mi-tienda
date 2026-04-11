@@ -1,4 +1,14 @@
 {
+  "/flexi-options": {
+    "target": "https://appprot.whapruebas.com/index.php/wp-json",
+    "secure": true,
+    "changeOrigin": true,
+    "onProxyReq": function(proxyReq: any) {
+      proxyReq.setHeader('Origin', 'https://appprot.whapruebas.com');
+      proxyReq.setHeader('Referer', 'https://appprot.whapruebas.com/');
+    },
+    "logLevel": "debug"
+  },
   "/proxy-wc/main": {
     "target": "https://appprot.whapruebas.com",
     "secure": true,

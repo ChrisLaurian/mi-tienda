@@ -16,14 +16,39 @@ export const environment = {
     }
     ,
     pluginTopics: {
-      color: {
-        label: 'Color',
-        categoryNames: ['ropa', 'camisa', 'tee'],
+      toppings: {
+        label: ' toppings',
+        categoryNames: ['hamburguesa', 'pizza', 'sandwich', 'comida'],
         type: 'checkbox',
         options: [
-          { id: 'rojo', label: 'Rojo' },
-          { id: 'azul', label: 'Azul' },
-          { id: 'negro', label: 'Negro' }
+          { id: 'queso', label: 'Queso extra', price: 2 },
+          { id: 'tocino', label: 'Tocino', price: 3 },
+          { id: 'huevo', label: 'Huevo', price: 2.5 },
+          { id: 'aguacate', label: 'Aguacate', price: 4 },
+          { id: 'cebolla', label: 'Cebolla caramelizada', price: 2 },
+          { id: 'tomate', label: 'Tomate', price: 1.5 }
+        ]
+      },
+      size: {
+        label: 'Tamaño',
+        categoryNames: ['hamburguesa', 'pizza', 'sandwich', 'comida', 'bebida'],
+        type: 'radio',
+        required: true,
+        options: [
+          { id: 'chico', label: 'Chico', price: 0 },
+          { id: 'mediano', label: 'Mediano', price: 5 },
+          { id: 'grande', label: 'Grande', price: 10 }
+        ]
+      },
+      drinks: {
+        label: 'Bebida',
+        categoryNames: ['comida', 'hamburguesa', 'pizza', 'pollo'],
+        type: 'radio',
+        options: [
+          { id: 'refresco', label: 'Refresco', price: 0 },
+          { id: 'agua', label: 'Agua mineral', price: 0 },
+          { id: 'jugo', label: 'Jugo natural', price: 5 },
+          { id: 'limonada', label: 'Limonada', price: 7 }
         ]
       }
     }

@@ -53,6 +53,13 @@ export class ProductDetailPage implements OnInit {
     addIcons({ cartOutline });
   }
 
+  hasPersonalizationData(): boolean {
+    if (!this.enrichedCategories || this.enrichedCategories.length === 0) {
+      return false;
+    }
+    return this.enrichedCategories.some(c => c?.data && c.data.length > 0);
+  }
+
   isOptionSelected(categoryId: number, optionGroup: string, optionName: string): boolean {
     const key = String(categoryId);
     if (this.selectedCategoryOptions[key] && this.selectedCategoryOptions[key][optionGroup]) {
@@ -81,73 +88,66 @@ export class ProductDetailPage implements OnInit {
     }
   }
 
-  private loadCategoriesInterior(categories: any[], productId: number) {
-    if (!categories || categories.length === 0) {
+  private loadCategoriesInterior(categories: any[], product: any) {
+    if (!product) {
       this.enrichedCategories = [];
       return;
     }
     
-    this.enrichedCategories = categories.map(c => ({ ...c, data: [] }));
+    // First, check if flexi-options data is in product meta_data
+    if (product.meta_data && product.meta_data.length > 0) {
+      const flexiMeta = product.meta_data.find((m: any) => 
+        m.key === '_mgp_data' || 
+        m.key.includes('flexi') || 
+        m.key.includes('personaliz')
+      );
+      
+      if (flexiMeta && flexiMeta.value && flexiMeta.value.length > 0) {
+        console.log('Found flexi data in meta_data:', flexiMeta.value);
+        this.enrichedCategories = flexiMeta.value;
+        return;
+      }
+    }
     
-    this.woocommerceService.getProductCategoriesWithData(productId).subscribe({
-      next: (flexiData: any) => {
-        if (flexiData && Array.isArray(flexiData) && flexiData.length > 0) {
-          const enriched = this.enrichedCategories.map(cat => {
-            return { ...cat, data: flexiData };
-          });
-          this.enrichedCategories = enriched;
-        } else {
-          const devData = this.getDevCategoriesData(productId);
-          if (devData && devData.length > 0) {
-            const enriched = this.enrichedCategories.map(cat => {
-              return { ...cat, data: devData };
-            });
-            this.enrichedCategories = enriched;
-          }
+    // FALLBACK: Use hardcoded data based on category name
+    const categoryNames = (categories || []).map((c: any) => c.name?.toLowerCase() || '');
+    
+    if (categoryNames.includes('batido')) {
+      this.enrichedCategories = [
+        {
+          id: 19,
+          name: 'Batido',
+          slug: 'batido',
+          data: [
+            {
+              titulo: 'Frutas',
+              required: 'no',
+              tipo: 'checkbox',
+              items: [
+                { nombre: 'Fresa', precio: 0, stock: 'yes' },
+                { nombre: 'Durazno', precio: 0, stock: 'yes' },
+                { nombre: 'Plátano', precio: 0, stock: 'yes' }
+              ]
+            },
+            {
+              titulo: 'Tamaño',
+              required: 'yes',
+              tipo: 'radio',
+              items: [
+                { nombre: 'Ch', precio: 0, stock: 'yes' },
+                { nombre: 'M', precio: 0, stock: 'yes' },
+                { nombre: 'G', precio: 0, stock: 'yes' }
+              ]
+            }
+          ]
         }
-      },
-      error: () => {
-        const devData = this.getDevCategoriesData(productId);
-        if (devData && devData.length > 0) {
-          const enriched = this.enrichedCategories.map(cat => {
-            return { ...cat, data: devData };
-          });
-          this.enrichedCategories = enriched;
-        }
-      }
-    });
-  }
-  
-  private getDevCategoriesData(productId: number): any[] {
-    // Datos de ejemplo basados en lo que mostraste
-    return [
-      {
-        titulo: 'Frutas',
-        required: 'no',
-        tipo: 'checkbox',
-        layout: 'vertical',
-        items: [
-          { nombre: 'Fresa', precio: 0, stock: 'yes' },
-          { nombre: 'Durazno', precio: 0, stock: 'yes' },
-          { nombre: 'Platano', precio: 0, stock: 'yes' }
-        ]
-      },
-      {
-        titulo: 'Tamaño',
-        required: 'yes',
-        tipo: 'radio',
-        layout: 'vertical',
-        items: [
-          { nombre: 'Ch', precio: 0, stock: 'yes' },
-          { nombre: 'M', precio: 0, stock: 'yes' },
-          { nombre: 'G', precio: 0, stock: 'yes' }
-        ]
-      }
-    ];
-  }
-
-  private mockCategories(ids: number[]): any[] {
-    return ids.map((id) => ({ id, name: `Categoría ${id}`, slug: `categoria-${id}`, description: 'Datos simulados', count: Math.floor(Math.random() * 100) }));
+      ];
+      console.log('✅ Loaded fallback data for Batido');
+      return;
+    }
+    
+    this.enrichedCategories = [];
+    console.log('No personalization data available');
   }
 
   ngOnInit() {
@@ -162,8 +162,9 @@ export class ProductDetailPage implements OnInit {
     this.woocommerceService.getProductById(id).subscribe({
       next: (data) => {
         this.product = data;
+        console.log('Product loaded:', data?.name, ' categories:', data?.categories);
         this.loadTopics();
-        this.loadCategoriesInterior(data?.categories || [], id);
+        this.loadCategoriesInterior(data?.categories || [], data);
         this.isLoading = false;
       },
       error: () => {
@@ -353,16 +354,35 @@ export class ProductDetailPage implements OnInit {
       if (name) acc.push(name);
       return acc;
     }, []);
+    
     const result: TopicGroup[] = [];
+    
+    if (catNames.length === 0) {
+      Object.keys(topicsCfg).forEach((key) => {
+        const t = topicsCfg[key];
+        if (Array.isArray(t?.options) && t.options.length > 0) {
+          result.push({
+            key,
+            label: t?.label || key,
+            type: (t?.type === 'radio' ? 'radio' : 'checkbox'),
+            required: t?.required || false,
+            options: Array.isArray(t?.options) ? t.options : [],
+          });
+        }
+      });
+      return result;
+    }
+    
     Object.keys(topicsCfg).forEach((key) => {
       const t = topicsCfg[key];
       const names = (t?.categoryNames || []).map((s: string) => s.toLowerCase());
       const matches = names.some((n: string) => catNames.includes(n));
-      if ((matches || catNames.length === 0) && Array.isArray(t?.options) && t.options.length > 0) {
+      if (matches && Array.isArray(t?.options) && t.options.length > 0) {
         result.push({
           key,
           label: t?.label || key,
           type: (t?.type === 'radio' ? 'radio' : 'checkbox'),
+          required: t?.required || false,
           options: Array.isArray(t?.options) ? t.options : [],
         });
       }

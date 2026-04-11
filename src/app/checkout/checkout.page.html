@@ -62,7 +62,7 @@
         <ion-input [formControl]="form.controls.postcode" autocomplete="postal-code"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-label position="stacked">País (ISO, ej: MX)</ion-label>
+        <ion-label position="stacked">País (ISO, ej: PE)</ion-label>
         <ion-input [formControl]="form.controls.country" autocomplete="country"></ion-input>
       </ion-item>
       <ion-item>
@@ -70,6 +70,26 @@
         <ion-textarea [formControl]="form.controls.notes" autoGrow="true"></ion-textarea>
       </ion-item>
     </ion-list>
+
+    <div class="payment-section">
+      <h3>Método de pago</h3>
+      <ion-radio-group [(ngModel)]="selectedPaymentMethod" class="payment-options">
+        <div class="payment-option" *ngFor="let gateway of paymentGateways">
+          <ion-radio [value]="gateway.id" [name]="gateway.id"></ion-radio>
+          <div class="payment-info">
+            <span class="payment-title">{{ gateway.title }}</span>
+            <span class="payment-desc" *ngIf="gateway.description">{{ gateway.description }}</span>
+          </div>
+        </div>
+        <div class="payment-option">
+          <ion-radio value="cod" name="cod"></ion-radio>
+          <div class="payment-info">
+            <span class="payment-title">Contra entrega</span>
+            <span class="payment-desc">Paga cuando recibas tu producto</span>
+          </div>
+        </div>
+      </ion-radio-group>
+    </div>
 
     <ion-button expand="block" [disabled]="isSubmitting" (click)="submit()">
       <span *ngIf="!isSubmitting">Crear orden</span>

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Observable, catchError, throwError, of } from 'rxjs';
+import { Observable, catchError, throwError, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -206,16 +206,31 @@ export class WoocommerceService {
   }
 
   // Obtener las categorías con data de personalización para un producto específico
+  // Usando el proxy para evitar CORS
   getProductCategoriesWithData(productId: number): Observable<any> {
-    const url = `https://appprot.whapruebas.com/index.php/wp-json/flexi-options/v1/topics/${productId}`;
+    const url = `/flexi-options/v1/topics/${productId}`;
+    console.log('Calling flexi-options via proxy:', url);
     
-    return this.http.get(url, { 
-      headers: new HttpHeaders({
+    // Get credentials from environment
+    const consumerKey = (environment as any).woocommerce?.consumerKey || 'ck_a42e54dee022e07234e930cfdd3c6cf883a24a48';
+    const consumerSecret = (environment as any).woocommerce?.consumerSecret || 'cs_500dc3cff7fb6f0dc3703ae555c5bf7975417b8f';
+    
+    // Try with headers instead of query params
+    return this.http.get(url, {
+      params: {
+        consumer_key: consumerKey,
+        consumer_secret: consumerSecret
+      },
+      headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }),
-      withCredentials: false
+      }
     }).pipe(
-      catchError(() => of(null))
+      tap(response => console.log('✅ Flexi-options response:', response)),
+      catchError(err => {
+        console.log('❌ Flexi-options error:', err.status, err.message);
+        return of(null);
+      })
     );
   }
 
@@ -282,5 +297,12 @@ export class WoocommerceService {
       .set('order', 'desc');
 
     return this.http.get<any[]>(url, { params, headers });
+  }
+
+  getPaymentGateways(): Observable<any[]> {
+    const { url, params, headers } = this.buildApiUrl('/wc/v3/payment_gateways');
+    return this.http.get<any[]>(url, { params, headers }).pipe(
+      catchError(() => of([]))
+    );
   }
 }
